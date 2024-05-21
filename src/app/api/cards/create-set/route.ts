@@ -44,9 +44,10 @@ function generateInsertLinesValuesArray(card: CardInSet) {
 export async function POST(req: Request) {
   const data = await req.json();
   const client = await db.connect();
-  await client.query('BEGIN');
-
+  
   try {
+    await client.query('BEGIN');
+    
     const insertSetCmd = `
       INSERT INTO set (id, name, description, datecreated)
       VALUES ($1, $2, $3, $4);
