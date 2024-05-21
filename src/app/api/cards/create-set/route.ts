@@ -74,11 +74,6 @@ export async function POST(req: Request) {
     });
   
     client.query('COMMIT');
-
-    return new Response(JSON.stringify({ msg: 'success'}), {
-      status: 200,
-    });
-
   } catch (err) {
     client.query('ROLLBACK');
 
@@ -88,5 +83,9 @@ export async function POST(req: Request) {
   } finally {
     client.release();
   }
+
+  return new Response(JSON.stringify({ msg: 'success'}), {
+    status: 200,
+  });
 
 }
