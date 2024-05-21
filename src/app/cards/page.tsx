@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import { QueryResultRow, sql } from '@vercel/postgres';
-import ExpandableCard from '@/app/components/ExpandableCard';
 import { unstable_noStore as noStore } from 'next/cache';
 
 export const metadata: Metadata = {
@@ -15,7 +14,7 @@ async function getSets() {
   return result.rows;
 }
 
-export default async function ListCards(req: Request) {
+export default async function ListCards() {
   noStore();
   const sets = await getSets();
 
@@ -31,7 +30,6 @@ export default async function ListCards(req: Request) {
             description: set.description,
           }
 
-          console.log(currentSet);          
           return (
             <div key={currentSet.id}>
               <p><a href={`/set/${currentSet.id}`}>{currentSet.title}</a><span>{currentSet.dateCreated.toLocaleString()}</span></p>
