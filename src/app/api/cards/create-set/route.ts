@@ -55,28 +55,28 @@ export async function POST(req: Request) {
     const set = data.set;
     const setData = [set.id, set.title, set.description, set.dateCreated];
   
-    client.query(insertSetCmd, setData);
+    await client.query(insertSetCmd, setData);
   
     const insertCardsBase = `INSERT INTO card(id, inset, datecreated, title) VALUES`;
     const numPropertiesInCard = 4;
     const insertCardsQuery = generateInsertQuery(insertCardsBase, data.cardsInSet.length, numPropertiesInCard);
     const insertCardsValues = generateInsertCardsValuesArray(data.cardsInSet);
     
-    client.query(insertCardsQuery, insertCardsValues);
+    await client.query(insertCardsQuery, insertCardsValues);
   
   
-    data.cardsInSet.forEach((card: CardInSet) => {
+    data.cardsInSet.forEach(async (card: CardInSet) => {
       const insertCardLinesBase = `INSERT INTO cardline (cardid, heading, content) VALUES`;
       const numPropertiesInLine = 3;
       const insertCardLinesQuery = generateInsertQuery(insertCardLinesBase, card.back.lines.length, numPropertiesInLine);
       const insertCardLinesValues = generateInsertLinesValuesArray(card);
   
-      client.query(insertCardLinesQuery, insertCardLinesValues);
+      await client.query(insertCardLinesQuery, insertCardLinesValues);
     });
   
-    client.query('COMMIT');
+    await client.query('COMMIT');
   } catch (err) {
-    client.query('ROLLBACK');
+    await client.query('ROLLBACK');
 
     return new Response(JSON.stringify({ msg: 'error' }), {
       status: 400,
