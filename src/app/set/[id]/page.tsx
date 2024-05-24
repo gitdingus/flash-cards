@@ -2,7 +2,6 @@ import { sql } from '@vercel/postgres';
 import ExpandableCard from '@/app/components/ExpandableCard';
 
 export default async function SetInfo({ params }: { params: { id: string } }) {
-  console.log(params.id);
   const set = await sql`
     SELECT * FROM set WHERE id = ${params.id};
   `;
@@ -11,8 +10,6 @@ export default async function SetInfo({ params }: { params: { id: string } }) {
     SELECT * FROM card WHERE inset = ${params.id};
   `;
 
-  console.log(set.rows);
-  console.log(cards.rows);
   return (
     <div>
       <h1>Set</h1>
