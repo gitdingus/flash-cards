@@ -41,3 +41,12 @@ interface LineRecord {
 interface CardInSet extends CardBase {
   inSet: string,
 }
+
+interface UserRecord {
+  id: string,
+  username: string,
+  salt: string,
+  passwordhash: string,
+  email: string,
+  datecreated: string,
+}
