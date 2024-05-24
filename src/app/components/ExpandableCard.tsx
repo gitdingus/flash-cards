@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { getCardData } from '@/actions/card-actions';
 
 interface Props {
   card: CardRecord,
@@ -10,15 +11,17 @@ export default function ExpandableCard({ card, children }: Props) {
   const [ expanded, setExpanded ] = useState(false);
   const [ lines, setLines ] = useState<LineRecord[]>([]);
 
+  useEffect(() => {
+    const getIt = async () => {
+      const gotLines = await getCardData(card.id);
+      setLines(gotLines);
+    };
+
+    getIt();
+
+  }, [card.id]);
+
   const click = () => {
-    fetch(`/api/cards/${card.id}`)
-      .then((res) => {
-        if (res.status === 200) {
-          return res.json();
-        }
-      }).then((data: LineRecord[]) => {
-        setLines(data);
-      });
     setExpanded(!expanded);
   }
 
