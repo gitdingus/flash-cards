@@ -18,6 +18,11 @@ export async function emailUsed(email: string) {
   return findEmail.rows.length > 0;
 }
 
+export async function getUser(username: string) {
+  const user = await sql`SELECT * FROM users WHERE username = ${username};`;
+  return user.rows[0];
+}
+
 export async function insertAccount(username: string, password: string, email: string) {
   const { salt, hash } = saltHash(password);
   const created = new Date().toISOString();
