@@ -1,5 +1,7 @@
 'use server';
-import { saltHash } from '@/utils/passwords';
+import { signIn as authSignIn} from '@/auth';
+import { isRedirectError } from 'next/dist/client/components/redirect';
+import { AuthError } from 'next-auth';
 import { 
   duplicateUsername, 
   emailUsed,
@@ -14,7 +16,6 @@ interface FormError {
 interface CreateAccountState extends Array<FormError> {};
 
 export async function createAccount(prevState: CreateAccountState, formData: FormData) {
-  console.log(formData);
   const messages: CreateAccountState = [];
   const username = formData.get('username')?.toString();
   const password = formData.get('password')?.toString();
@@ -46,4 +47,29 @@ export async function createAccount(prevState: CreateAccountState, formData: For
   }
 
   return messages;
+}
+
+export async function signIn(formData: FormData) {
+  if (!formData.get('username') || !formData.get('password')) {
+    throw new Error('Please provide username and password');
+  }
+  
+  try {
+    await authSignIn('credentials', formData);
+  } catch (err) {
+    if (isRedirectError(err)) {
+      throw err; // 
+    }
+
+    const { type } = err as AuthError;
+
+    switch (type) {
+      case 'CredentialsSignin':
+        throw new Error('Invalid username and/or password');
+      default:
+        throw new Error('Something went wrong');
+    }
+  }
+
+  return 'Login successful';
 }
