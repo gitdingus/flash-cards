@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import Authentication from './components/Authentication';
+import { auth } from '@/auth';
 
 export const metadata = {
   title: {
@@ -8,30 +10,36 @@ export const metadata = {
   description: 'Flash Card app',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await auth();
   return (
     <html lang="en">
       <body>
-        <div>
-          <ul>
-            <li>
-              <Link href="/">Home</Link>
-            </li>
-            <li>
-              <Link href="/cards/create">Create Card</Link>
-            </li>
-            <li>
-              <Link href="/cards/create-set">Create Set</Link>
-            </li>
-            <li>
-              <a href="/cards">View Cards</a>
-            </li>
-          </ul>
-        </div>
+        <header>
+          <nav>
+            <ul>
+              <li>
+                <Link href="/">Home</Link>
+              </li>
+              <li>
+                <Link href="/cards/create">Create Card</Link>
+              </li>
+              <li>
+                <Link href="/cards/create-set">Create Set</Link>
+              </li>
+              <li>
+                <a href="/cards">View Cards</a>
+              </li>
+            </ul>
+          </nav>
+          <div>
+            <Authentication session={session} />
+          </div>
+        </header>
         {children}
       </body>
     </html>
