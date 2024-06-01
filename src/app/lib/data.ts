@@ -1,3 +1,4 @@
+'use server';
 import { sql } from '@vercel/postgres';
 import { saltHash } from '@/utils/passwords';
 import { v4 as uuid } from 'uuid';
