@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { v4 as uuid } from 'uuid';
+import { createSet } from '@/actions/card-actions';
 import CardInput from './CardInput';
 
 export default function CreateSet() {
@@ -8,8 +9,7 @@ export default function CreateSet() {
   const [ description, setDescription ] = useState('');
   const [ cards, setCards ] = useState<CardBase[]>([]);
   const [ activeCard, setActiveCard ] = useState<CardBase | null>();
-
-  const createSet = () => {
+  const compileSetData = () => {
     const set: CardSet = {
       id: uuid(),
       title: setTitle,
@@ -26,22 +26,10 @@ export default function CreateSet() {
       return cardInSet;
     });
 
-    const data = { set, cardsInSet };
-
-    fetch('/api/cards/create-set', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then((res: Response) => {
-        console.log(res.status);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    return { set, cardsInSet };
   }
+  const createSetWithData = createSet.bind(null, compileSetData());
+
   const saveCard = (card: CardBase) => {
     const newCards = cards.slice();
     newCards.push(card);
@@ -50,7 +38,7 @@ export default function CreateSet() {
 
   return (
     <div>
-      <form>
+      <form action={createSetWithData}>
         <div>
           <h2>Set Information</h2>
           <div>
@@ -125,7 +113,7 @@ export default function CreateSet() {
             <CardInput saveCard={saveCard} />
           }
         </div>
-        <button type="button" onClick={createSet}>Create Set</button>
+        <button type="submit">Create Set</button>
       </form>
     </div>
   )
