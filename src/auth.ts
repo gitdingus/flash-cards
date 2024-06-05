@@ -12,6 +12,7 @@ declare module 'next-auth' {
   }
 
   interface User {
+    userId: string,
     username: string,
   }
 }
@@ -51,7 +52,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.userId = user.id;
+        token.userId = user.userId;
         token.username = user.username;
       }
 
