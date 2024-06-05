@@ -1,7 +1,20 @@
-import NextAuth, { AuthError, CredentialsSignin } from "next-auth";
+import NextAuth, { type DefaultSession } from "next-auth";
 import Credentials from 'next-auth/providers/credentials';
 import { verifyPassword } from '@/utils/passwords';
 import { getUser } from '@/app/lib/data';
+
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      userId: string,
+      username: string,
+    } & DefaultSession['user']
+  }
+
+  interface User {
+    username: string,
+  }
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -18,8 +31,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        const user = await getUser(credentials.username);
-
+        const userRow = await getUser(credentials.username);
+        const user = {
+          userId: userRow.id,
+          username: userRow.username,
+          email: userRow.email,
+          salt: userRow.salt,
+          passwordhash: userRow.passwordhash,
+        }
         if (!user) {
           return null;
         }
@@ -29,4 +48,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     })
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.userId = user.id;
+        token.username = user.username;
+      }
+
+      return token;
+    },
+    async session({ session, token }) {
+      // better way to fix this typescript error???
+      session.user.userId = token.userId as string;
+      session.user.username = token.username as string;
+
+      return session;
+    },
+  },
 });
