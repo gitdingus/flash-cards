@@ -23,6 +23,7 @@ interface CardSet  {
   title: string,
   description: string,
   dateCreated: Date,
+  isPublic: boolean,
 }
 
 interface CardRecord {

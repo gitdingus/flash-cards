@@ -9,12 +9,15 @@ export default function CreateSet() {
   const [ description, setDescription ] = useState('');
   const [ cards, setCards ] = useState<CardBase[]>([]);
   const [ activeCard, setActiveCard ] = useState<CardBase | null>();
+  const [ isPublic, setIsPublic ] = useState(true);
+
   const compileSetData = () => {
     const set: CardSet = {
       id: uuid(),
       title: setTitle,
       description: description,
       dateCreated: new Date(),
+      isPublic,
     }
 
     const cardsInSet = cards.map((card) => {
@@ -112,6 +115,12 @@ export default function CreateSet() {
             activeCard === null &&
             <CardInput saveCard={saveCard} />
           }
+        </div>
+        <div>
+          <label>
+            Public
+            <input type="checkbox" name="public" defaultChecked={isPublic} onChange={(e) => setIsPublic(!isPublic)} />
+          </label>
         </div>
         <button type="submit">Create Set</button>
       </form>

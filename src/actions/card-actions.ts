@@ -60,10 +60,10 @@ export async function createSet({ set, cardsInSet }: { set: CardSet, cardsInSet:
     
     console.log('inserting set');
     const insertSetCmd = `
-      INSERT INTO set (id, name, description, datecreated, owner)
-      VALUES ($1, $2, $3, $4, $5);
+      INSERT INTO set (id, name, description, datecreated, owner, public)
+      VALUES ($1, $2, $3, $4, $5, $6);
     `;
-    const setData = [set.id, set.title, set.description, set.dateCreated, session.user.userId];
+    const setData = [set.id, set.title, set.description, set.dateCreated, session.user.userId, set.isPublic];
   
     await client.query(insertSetCmd, setData);
   
