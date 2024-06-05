@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 async function getSets() {
   const result = await sql`
-    SELECT * FROM set;
+    SELECT * FROM set WHERE public = 'true';
   `; 
 
   return result.rows;
@@ -28,6 +28,7 @@ export default async function ListCards() {
             title: set.name,
             dateCreated: set.datecreated,
             description: set.description,
+            isPublic: set.public,
           }
 
           return (
