@@ -3,11 +3,12 @@ import { useState } from 'react';
 
 interface LineInputProps {
   saveLine: (line: Line) => void,
+  removeLine?: (line: Line) => void,
   line?: Line,
   editMode?: boolean,
 }
 
-export default function LineInput({ saveLine, line, editMode = true }: LineInputProps) {
+export default function LineInput({ saveLine, removeLine, line, editMode = true }: LineInputProps) {
   const [heading, setHeading] = useState(line?.heading || '');
   const [content, setContent] = useState(line?.content || '');
   const [editing, setEditing] = useState<boolean>(editMode);
@@ -63,6 +64,7 @@ export default function LineInput({ saveLine, line, editMode = true }: LineInput
       <div>
         <p><span>{heading}</span>: <span>{content}</span></p>
         <button type="button" onClick={toggleEditMode}>Edit</button>
+        <button type="button" onClick={() => {if (removeLine) removeLine({heading, content})}}>Delete</button>
       </div>
     )
   }
