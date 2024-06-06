@@ -57,10 +57,7 @@ export default function CardInput({ saveCard, card }: CardInputProps) {
                 }} 
                 removeLine={(line: Line) => {
                   const newLines = lines.slice();
-                  const lineIndex = newLines.findIndex(({heading, content}) => 
-                    heading === line.heading && content === line.content
-                  );
-                  newLines.splice(lineIndex, 1);
+                  newLines.splice(index, 1);
                   setLines(newLines);
                 }}
                 line={line} 
