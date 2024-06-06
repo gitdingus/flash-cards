@@ -1,7 +1,7 @@
 import NextAuth, { type DefaultSession } from "next-auth";
 import Credentials from 'next-auth/providers/credentials';
 import { verifyPassword } from '@/utils/passwords';
-import { getUser } from '@/app/lib/data';
+import { getUser } from '@/app/lib/accounts';
 
 declare module 'next-auth' {
   interface Session {

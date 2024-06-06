@@ -6,7 +6,7 @@ import {
   duplicateUsername, 
   emailUsed,
   insertAccount,
-} from '@/app/lib/data';
+} from '@/app/lib/accounts';
 
 interface FormError {
   field: string,
