@@ -1,17 +1,19 @@
 'use client';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 interface LineInputProps {
   saveLine: (line: Line) => void,
   removeLine?: (line: Line) => void,
   line?: Line,
   editMode?: boolean,
+  focusOnSave?: boolean,
 }
 
-export default function LineInput({ saveLine, removeLine, line, editMode = true }: LineInputProps) {
+export default function LineInput({ saveLine, removeLine, line, editMode = true, focusOnSave = false }: LineInputProps) {
   const [heading, setHeading] = useState(line?.heading || '');
   const [content, setContent] = useState(line?.content || '');
   const [editing, setEditing] = useState<boolean>(editMode);
+  const headingInput = useRef<HTMLInputElement>(null);
 
   const toggleEditMode = () => {
     if (heading && content) {
@@ -24,6 +26,10 @@ export default function LineInput({ saveLine, removeLine, line, editMode = true 
       } else {
         setHeading('');
         setContent('');
+
+        if (focusOnSave && headingInput.current) {
+          headingInput.current.focus();
+        }
       }
     }
   }
@@ -42,6 +48,7 @@ export default function LineInput({ saveLine, removeLine, line, editMode = true 
             <input
               value={ heading }
               onChange={ (e) => setHeading(e.target.value) }
+              ref={headingInput}
             />
           </label>
         </div>
@@ -64,7 +71,7 @@ export default function LineInput({ saveLine, removeLine, line, editMode = true 
       <div>
         <p><span>{heading}</span>: <span>{content}</span></p>
         <button type="button" onClick={toggleEditMode}>Edit</button>
-        <button type="button" onClick={() => {if (removeLine) removeLine({heading, content})}}>Delete</button>
+        <button type="button" onClick={() => { if (removeLine) removeLine({heading, content}); }}>Delete</button>
       </div>
     )
   }

@@ -74,8 +74,9 @@ export default function CardInput({ saveCard, card }: CardInputProps) {
             const newLines = lines.slice();
             newLines.push(line);
             setLines(newLines);
-          }
-        } />
+          }}
+          focusOnSave={true}
+        />
       </div>
       <button type="button" onClick={save}>Save Card</button>
     </div>
