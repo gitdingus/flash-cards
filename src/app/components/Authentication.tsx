@@ -16,7 +16,7 @@ interface Props {
 type LoginState = "create" | "login" | "loggedin";
 
 export default function Authentication({ session }: any) {
-  const [ loginState, setLoginState ] = useState<LoginState>('login');
+  const [ loginState, setLoginState ] = useState<LoginState>(session ? 'loggedin' : 'login');
   
   useEffect(() => {
     if (session) {
