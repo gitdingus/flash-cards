@@ -80,6 +80,15 @@ export default function CreateSet() {
                   >
                     Edit
                   </button>
+                  <button type="button"
+                    onClick={() => {
+                      const newCards = cards.slice();
+                      newCards.splice(index, 1);
+                      setCards(newCards);
+                    }}
+                  >
+                    Delete
+                  </button>
                   <ul>
                     {
                       card.back.lines.map((line, lineIndex) => {
