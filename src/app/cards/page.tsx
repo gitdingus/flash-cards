@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 }
 
 export default async function ListCards() {
-  const sets: CardSet[] = await getSets();
+  const sets: SetInfo[] = await getSets();
 
   return (
     <>

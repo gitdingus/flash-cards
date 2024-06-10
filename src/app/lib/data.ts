@@ -8,12 +8,13 @@ export async function getSets() {
   `; 
 
   const sets = result.rows.map((set) => {
-    const cardSet: CardSet = {
+    const cardSet: SetInfo = {
       id: set.id,
       title: set.name,
       dateCreated: set.datecreated,
       description: set.description,
       isPublic: set.public,
+      owner: set.owner,
     }
 
     return cardSet;
@@ -34,11 +35,12 @@ export async function getOwnSets() {
   `;
 
   const sets = result.rows.map((set) => {
-    const cardSet: CardSet = {
+    const cardSet: SetInfo = {
       id: set.id,
       title: set.name,
       dateCreated: set.datecreated,
       description: set.description,
+      owner: set.owner,
       isPublic: set.public,
     }
 

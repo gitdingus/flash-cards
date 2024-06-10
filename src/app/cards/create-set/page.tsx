@@ -12,7 +12,7 @@ export default function CreateSet() {
   const [ isPublic, setIsPublic ] = useState(true);
 
   const compileSetData = () => {
-    const set: CardSet = {
+    const set: SetInfo = {
       id: uuid(),
       title: setTitle,
       description: description,

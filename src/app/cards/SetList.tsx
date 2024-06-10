@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import { populateSets } from '../lib/data';
 
 interface SetListProps {
-  initialSets: CardSet[],
+  initialSets: SetInfo[],
 }
 
 export default function SetList({ initialSets }: SetListProps) {
-  const [ sets, setSets ] = useState<CardSet[]>(initialSets);
+  const [ sets, setSets ] = useState<SetInfo[]>(initialSets);
   const [ showOwnSets, setShowOwnSets ] = useState(false);
 
   useEffect(() => {

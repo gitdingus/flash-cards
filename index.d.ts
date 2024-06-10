@@ -18,12 +18,17 @@ interface CardBase {
   dateCreated: Date,
 }
 
-interface CardSet  {
+interface SetInfo  {
   id: string,
   title: string,
   description: string,
   dateCreated: Date,
+  owner: string,
   isPublic: boolean,
+}
+
+interface SetOfCards extends SetInfo{
+  cards: CardBase[],
 }
 
 interface CardRecord {
