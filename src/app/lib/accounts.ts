@@ -24,6 +24,25 @@ export async function getUser(username: string) {
   return user.rows[0];
 }
 
+export async function getUserById(id: string) {
+  const userQuery = await sql`SELECT * FROM users WHERE id = ${id}`;
+
+  if (userQuery.rows.length != 1) {
+    return null;
+  }
+
+  const userRecord = userQuery.rows[0];
+
+  const user: PublicUser = {
+    id: userRecord.id,
+    dateCreated: userRecord.datecreated,
+    username: userRecord.username,
+    email: userRecord.email,  
+  }
+
+  return user;
+}
+
 export async function insertAccount(username: string, password: string, email: string) {
   const { salt, hash } = saltHash(password);
   const created = new Date().toISOString();
