@@ -56,3 +56,10 @@ interface UserRecord {
   email: string,
   datecreated: string,
 }
+
+interface PublicUser {
+  id: string,
+  username: string,
+  email: string,
+  dateCreated: string,
+}
