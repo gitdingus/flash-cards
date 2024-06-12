@@ -4,11 +4,14 @@ import { useState } from 'react';
 import LineInput from './LineInput';
 
 interface CardInputProps {
-  saveCard: (card: CardBase) => void,
   card?: CardBase,
+  saveCard: (card: CardBase) => void,
+  saveLine?: (line: Line) => void,
+  editLine?: (line: Line) => void,
+  removeLine?: (line: Line) => void,
 }
 
-export default function CardInput({ saveCard, card }: CardInputProps) {
+export default function CardInput({ card, saveCard, saveLine, editLine, removeLine }: CardInputProps) {
   const [ cardTitle, setCardTitle ] = useState(card?.front.title || '');
   const [ lines, setLines ] = useState<Line[]>(card?.back.lines || []);
 
@@ -24,6 +27,26 @@ export default function CardInput({ saveCard, card }: CardInputProps) {
 
     setCardTitle('');
     setLines([]);
+  }
+
+  const defaultSaveLine = (line: Line) => {
+    const newLines = lines.slice();
+    newLines.push(line);
+    setLines(newLines);
+  }
+
+  const defaultEditLine = (newLine: Line) => {
+    const newLines = lines.slice();
+    const lineIndex = newLines.findIndex((line) => line.id === newLine.id);
+    newLines.splice(lineIndex, 1, newLine);
+    setLines(newLines);
+  }
+
+  const defaultRemoveLine = (removeLine: Line) => {
+    const newLines = lines.slice();
+    const lineIndex = newLines.findIndex((line) => line.id === removeLine.id);
+    newLines.splice(lineIndex, 1);
+    setLines(newLines);
   }
 
   return (
@@ -50,16 +73,8 @@ export default function CardInput({ saveCard, card }: CardInputProps) {
             return (
               <LineInput 
                 key={lineId} 
-                saveLine={(newLine: Line) => {
-                  const newLines = lines.slice();
-                  newLines.splice(index, 1, newLine);
-                  setLines(newLines);
-                }} 
-                removeLine={(line: Line) => {
-                  const newLines = lines.slice();
-                  newLines.splice(index, 1);
-                  setLines(newLines);
-                }}
+                saveLine={editLine || defaultEditLine} 
+                removeLine={removeLine || defaultRemoveLine}
                 line={line} 
                 editMode={false} 
               />
@@ -67,11 +82,7 @@ export default function CardInput({ saveCard, card }: CardInputProps) {
           })
         }
         <LineInput 
-          saveLine={(line: Line) => {
-            const newLines = lines.slice();
-            newLines.push(line);
-            setLines(newLines);
-          }}
+          saveLine={saveLine || defaultSaveLine}
           focusOnSave={true}
         />
       </div>
