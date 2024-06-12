@@ -1,5 +1,6 @@
 'use client';
 import { useRef, useState } from 'react';
+import { v4 as uuid } from 'uuid';
 
 interface LineInputProps {
   saveLine: (line: Line) => void,
@@ -12,6 +13,7 @@ interface LineInputProps {
 export default function LineInput({ saveLine, removeLine, line, editMode = true, focusOnSave = false }: LineInputProps) {
   const [heading, setHeading] = useState(line?.heading || '');
   const [content, setContent] = useState(line?.content || '');
+  const [id, setId] = useState(line?.id || uuid());
   const [editing, setEditing] = useState<boolean>(editMode);
   const headingInput = useRef<HTMLInputElement>(null);
 
@@ -24,6 +26,7 @@ export default function LineInput({ saveLine, removeLine, line, editMode = true,
       if (line) {
         setEditing(!editing);
       } else {
+        setId(uuid());
         setHeading('');
         setContent('');
 
@@ -35,7 +38,7 @@ export default function LineInput({ saveLine, removeLine, line, editMode = true,
   }
 
   const save = () => {
-    const line: Line = { heading, content };
+    const line: Line = { id, heading, content };
     saveLine(line);
   }
   
@@ -71,7 +74,7 @@ export default function LineInput({ saveLine, removeLine, line, editMode = true,
       <div>
         <p><span>{heading}</span>: <span>{content}</span></p>
         <button type="button" onClick={toggleEditMode}>Edit</button>
-        <button type="button" onClick={() => { if (removeLine) removeLine({heading, content}); }}>Delete</button>
+        <button type="button" onClick={() => { if (removeLine) removeLine({id, heading, content}); }}>Delete</button>
       </div>
     )
   }

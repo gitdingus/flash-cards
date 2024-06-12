@@ -9,6 +9,7 @@ interface CardBack {
 interface Line {
   heading: string,
   content: string,
+  id: string, 
 }
 
 interface CardBase {
