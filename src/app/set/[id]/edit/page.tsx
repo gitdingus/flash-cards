@@ -1,4 +1,13 @@
 import { getSet } from "@/app/lib/data";
+import { 
+  removeLine, 
+  editLine, 
+  saveNewLine, 
+  saveNewCard, 
+  removeCard,
+  editCardTitle, 
+  updateSetInformation,
+} from '@/actions/set-actions';
 import { auth } from "@/auth";
 import SetInput from "@/app/components/set-tools/SetInput";
 
@@ -24,36 +33,32 @@ export default async function EditSet({ params }: EditSetParams) {
   return (
     <SetInput 
       set={set} 
-      submitAction={async ({set, cardsInSet}, formData) => {
+      submitAction={async ({newSet, cardsInSet}, formData) => {
         'use server';
-        console.log(set);
-        console.log(cardsInSet);
-        console.log('form data keys');
+        updateSetInformation(newSet);
       }}
       editCard={ async (card) => {
         'use server';
-        console.log(`card ${card.id} ${card.front.title} has been edited`);
+        // action only saves card title since lines get saved independently
+        editCardTitle({
+          ...card,
+          inSet: set.id,
+        });
       }}
       saveCard={ async (card) => {
         'use server';
-        console.log(`card ${card.id} ${card.front.title} has been created`);
+        saveNewCard(card, set);
       }}
       removeCard={ async (card) => { 
         'use server';
-        console.log(`removing card ${card.front.title}`); 
+        removeCard({
+          ...card,
+          inSet: set.id,
+        });
       }}
-      removeLine={ async (line) => {
-        'use server';
-        console.log(`removing line ${line.id}: ${line.heading}`);
-      }}
-      editLine={ async (line) => {
-        'use server';
-        console.log(`editing line ${line.id} to ${line.heading}: ${line.content}`);
-      }}
-      saveLine={ async (line) => {
-        'use server';
-        console.log(`saving line ${line.id} ${line.heading} ${line.content}`);
-      }}
+      removeLine={removeLine}
+      editLine={editLine}
+      saveLine={saveNewLine}
     />
   )
 }
