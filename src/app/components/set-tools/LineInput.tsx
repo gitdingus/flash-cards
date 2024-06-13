@@ -4,13 +4,14 @@ import { v4 as uuid } from 'uuid';
 
 interface LineInputProps {
   saveLine: (line: Line) => void,
+  editLine?: (line: Line) => void,
   removeLine?: (line: Line) => void,
   line?: Line,
   editMode?: boolean,
   focusOnSave?: boolean,
 }
 
-export default function LineInput({ saveLine, removeLine, line, editMode = true, focusOnSave = false }: LineInputProps) {
+export default function LineInput({ saveLine, editLine, removeLine, line, editMode = true, focusOnSave = false }: LineInputProps) {
   const [heading, setHeading] = useState(line?.heading || '');
   const [content, setContent] = useState(line?.content || '');
   const [id, setId] = useState(line?.id || uuid());
@@ -39,7 +40,11 @@ export default function LineInput({ saveLine, removeLine, line, editMode = true,
 
   const save = () => {
     const line: Line = { id, heading, content };
-    saveLine(line);
+    if (line && editLine) {
+      editLine(line);
+    } else {
+      saveLine(line);
+    }
   }
   
   if (editing) {
