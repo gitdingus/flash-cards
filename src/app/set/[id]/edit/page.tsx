@@ -30,6 +30,14 @@ export default async function EditSet({ params }: EditSetParams) {
         console.log(cardsInSet);
         console.log('form data keys');
       }}
+      editCard={ async (card) => {
+        'use server';
+        console.log(`card ${card.id} ${card.front.title} has been edited`);
+      }}
+      saveCard={ async (card) => {
+        'use server';
+        console.log(`card ${card.id} ${card.front.title} has been created`);
+      }}
       removeCard={ async (card) => { 
         'use server';
         console.log(`removing card ${card.front.title}`); 
