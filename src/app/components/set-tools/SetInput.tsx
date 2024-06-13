@@ -5,7 +5,7 @@ import { createSet } from '@/actions/set-actions';
 import CardInput from './CardInput';
 
 interface SetInputProps {
-  submitAction: ({ newSet, cardsInSet }: { newSet: SetInfoBase, cardsInSet: CardBase[]}, formData: FormData) => void,
+  submitAction: ({ newSet, cardsInSet }: { newSet: SetInfoBase, cardsInSet: CardInSet[]}, formData: FormData) => void,
   saveLine?: (line: Line, card: CardBase) => void,
   editLine?: (line: Line) => void,
   removeLine?: (line: Line) => void,
