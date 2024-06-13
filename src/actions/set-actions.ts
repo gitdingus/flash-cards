@@ -43,7 +43,7 @@ function generateInsertLinesValuesArray(card: CardInSet) {
   return values;
 }
 
-export async function createSet({ set, cardsInSet }: { set: SetInfoBase, cardsInSet: CardInSet[] }, formData: FormData) {
+export async function createSet({ newSet, cardsInSet }: { newSet: SetInfoBase, cardsInSet: CardInSet[] }, formData: FormData) {
   const [ client, session ] = await Promise.all([
     db.connect(),
     auth(),
@@ -53,21 +53,16 @@ export async function createSet({ set, cardsInSet }: { set: SetInfoBase, cardsIn
     throw new Error('Unauthorized');
   }
 
-  console.log(set);
-  console.log(cardsInSet);
   try {
     await client.query('BEGIN');
     
-    console.log('inserting set');
     const insertSetCmd = `
       INSERT INTO set (id, name, description, datecreated, owner, public)
       VALUES ($1, $2, $3, $4, $5, $6);
     `;
-    const setData = [set.id, set.title, set.description, set.dateCreated, session.user.userId, set.isPublic];
+    const setData = [newSet.id, newSet.title, newSet.description, newSet.dateCreated, session.user.userId, newSet.isPublic];
   
     await client.query(insertSetCmd, setData);
-  
-    console.log('set inserted');
 
     const insertCardsBase = `INSERT INTO card(id, inset, datecreated, title) VALUES`;
     const numPropertiesInCard = 4;
@@ -75,8 +70,7 @@ export async function createSet({ set, cardsInSet }: { set: SetInfoBase, cardsIn
     const insertCardsValues = generateInsertCardsValuesArray(cardsInSet);
     
     await client.query(insertCardsQuery, insertCardsValues);
-    console.log('inserted cards');
-  
+
     cardsInSet.forEach(async (card: CardInSet) => {
       const insertCardLinesBase = `INSERT INTO cardline (id, cardid, heading, content) VALUES`;
       const numPropertiesInLine = 4;
@@ -86,13 +80,9 @@ export async function createSet({ set, cardsInSet }: { set: SetInfoBase, cardsIn
       await client.query(insertCardLinesQuery, insertCardLinesValues);
     });
   
-    console.log('inserted cardlines');
-
     await client.query('COMMIT');
-    console.log('committed');
   } catch (err) {
     await client.query('ROLLBACK');
-    console.log(err);
   } finally {
     client.release();
   }
