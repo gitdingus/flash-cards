@@ -115,3 +115,19 @@ export async function getCardData(id: string) {
 
   return lines;
 }
+
+export async function removeLine(line: Line) {
+  await sql`DELETE FROM cardline WHERE id = ${line.id};`;
+}
+
+export async function editLine(line: Line) {
+  await sql`UPDATE cardline SET heading = ${line.heading}, content = ${line.content} WHERE id = ${line.id};`;
+}
+
+export async function saveNewLine(line: Line, card: CardBase) {
+  await sql`
+    INSERT INTO cardline (id, cardid, heading, content)
+    VALUES (${line.id}, ${card.id}, ${line.heading}, ${line.content});
+  `;
+}
+
