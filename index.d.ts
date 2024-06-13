@@ -19,13 +19,16 @@ interface CardBase {
   dateCreated: Date,
 }
 
-interface SetInfo  {
+interface SetInfoBase {
   id: string,
   title: string,
   description: string,
   dateCreated: Date,
+  isPublic: boolean,  
+}
+
+interface SetInfo extends SetInfoBase {
   owner: string,
-  isPublic: boolean,
 }
 
 interface SetOfCards extends SetInfo{
