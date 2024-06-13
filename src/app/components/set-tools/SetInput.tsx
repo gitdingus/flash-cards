@@ -5,7 +5,7 @@ import { createSet } from '@/actions/set-actions';
 import CardInput from './CardInput';
 
 interface SetInputProps {
-  submitAction: ({ set, cardsInSet }: { set: SetInfoBase, cardsInSet: CardBase[]}, formData: FormData) => void,
+  submitAction: ({ newSet, cardsInSet }: { newSet: SetInfoBase, cardsInSet: CardBase[]}, formData: FormData) => void,
   saveLine?: (line: Line, card: CardBase) => void,
   editLine?: (line: Line) => void,
   removeLine?: (line: Line) => void,
@@ -23,24 +23,24 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
   const [ activeCard, setActiveCard ] = useState<CardBase | null>(null);
 
   const compileSetData = () => {
-    const set: SetInfoBase = {
-      id: uuid(),
+    const newSet: SetInfoBase = {
+      id: set?.id || uuid(),
       title: setTitle,
       description: description,
-      dateCreated: new Date(),
+      dateCreated: set?.dateCreated || new Date(),
       isPublic,
     }
 
     const cardsInSet = cards.map((card) => {
       const cardInSet: CardInSet = {
         ...card,
-        inSet: set.id,
+        inSet: newSet.id,
       }
 
       return cardInSet;
     });
 
-    return { set, cardsInSet };
+    return { newSet, cardsInSet };
   }
   const submitActionWithData = submitAction.bind(null, compileSetData());
 
