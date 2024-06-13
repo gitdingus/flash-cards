@@ -6,7 +6,7 @@ import CardInput from './CardInput';
 
 interface SetInputProps {
   submitAction: ({ set, cardsInSet }: { set: SetInfoBase, cardsInSet: CardBase[]}, formData: FormData) => void,
-  saveLine?: (line: Line) => void,
+  saveLine?: (line: Line, card: CardBase) => void,
   editLine?: (line: Line) => void,
   removeLine?: (line: Line) => void,
   saveCard?: (card: CardBase) => void,
