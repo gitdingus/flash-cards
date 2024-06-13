@@ -2,11 +2,11 @@
 import { db, sql } from '@vercel/postgres';
 import { auth } from '@/auth';
 
-function generateInsertQuery(base: string, numCards: number, numFields: number) {
+function generateInsertQuery(base: string, numRows: number, numFields: number) {
   const valuesArr = [];
   let nextValues = '';
 
-  for (let i = 0; i <= numCards * numFields; i += 1) {
+  for (let i = 0; i <= numRows * numFields; i += 1) {
     if (i % numFields === 0) {
       if (nextValues) {
         valuesArr.push(nextValues);
