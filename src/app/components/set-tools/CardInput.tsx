@@ -69,12 +69,27 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
         <h3>Back</h3>
         {
           lines.map((line, index) => {
-            const lineId = uuid();
             return (
               <LineInput 
-                key={lineId} 
-                saveLine={editLine || defaultEditLine} 
-                removeLine={removeLine || defaultRemoveLine}
+                key={line.id} 
+                saveLine={(line: Line) => {
+                  defaultSaveLine(line)
+                  if (saveLine) {
+                    saveLine(line);
+                  }
+                }}
+                editLine={(line: Line) => {
+                  defaultEditLine(line);
+                  if (editLine) {
+                    editLine(line);
+                  }
+                }} 
+                removeLine={(line: Line) => {
+                  defaultRemoveLine(line);
+                  if (removeLine) {
+                    removeLine(line);
+                  }
+                }}
                 line={line} 
                 editMode={false} 
               />
@@ -82,7 +97,12 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
           })
         }
         <LineInput 
-          saveLine={saveLine || defaultSaveLine}
+          saveLine={(line: Line) => {
+            defaultSaveLine(line);
+            if (saveLine) {
+              saveLine(line);
+            }
+          }}
           focusOnSave={true}
         />
       </div>
