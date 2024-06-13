@@ -26,7 +26,7 @@ export async function getSet(id: string) {
 
   const cards: CardBase[] = await Promise.all(cardsQuery.rows.map(async (cardResult) => {
     const linesQuery = await client.sql`SELECT * FROM cardline WHERE cardid = ${cardResult.id}`;
-    const lines: Line[] = linesQuery.rows.map((line) => { return { heading: line.heading, content: line.content }});
+    const lines: Line[] = linesQuery.rows.map((line) => { return { id: line.id, heading: line.heading, content: line.content }});
     const card: CardBase = {
       id: cardResult.id,
       dateCreated: cardResult.datecreated,
