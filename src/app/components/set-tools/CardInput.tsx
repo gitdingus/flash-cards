@@ -6,7 +6,7 @@ import LineInput from './LineInput';
 interface CardInputProps {
   card?: CardBase,
   saveCard: (card: CardBase) => void,
-  saveLine?: (line: Line) => void,
+  saveLine?: (line: Line, card: CardBase) => void,
   editLine?: (line: Line) => void,
   removeLine?: (line: Line) => void,
 }
@@ -74,8 +74,8 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
                 key={line.id} 
                 saveLine={(line: Line) => {
                   defaultSaveLine(line)
-                  if (saveLine) {
-                    saveLine(line);
+                  if (card && saveLine) {
+                    saveLine(line, card);
                   }
                 }}
                 editLine={(line: Line) => {
@@ -99,8 +99,8 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
         <LineInput 
           saveLine={(line: Line) => {
             defaultSaveLine(line);
-            if (saveLine) {
-              saveLine(line);
+            if (card && saveLine) {
+              saveLine(line, card);
             }
           }}
           focusOnSave={true}
