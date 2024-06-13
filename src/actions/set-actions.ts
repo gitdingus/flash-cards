@@ -37,7 +37,7 @@ function generateInsertLinesValuesArray(card: CardInSet) {
   const values: string[] = [];
 
   card.back.lines.forEach((line) => {
-    values.push(card.id, line.heading, line.content);
+    values.push(line.id, card.id, line.heading, line.content);
   });
 
   return values;
@@ -78,8 +78,8 @@ export async function createSet({ set, cardsInSet }: { set: SetInfoBase, cardsIn
     console.log('inserted cards');
   
     cardsInSet.forEach(async (card: CardInSet) => {
-      const insertCardLinesBase = `INSERT INTO cardline (cardid, heading, content) VALUES`;
-      const numPropertiesInLine = 3;
+      const insertCardLinesBase = `INSERT INTO cardline (id, cardid, heading, content) VALUES`;
+      const numPropertiesInLine = 4;
       const insertCardLinesQuery = generateInsertQuery(insertCardLinesBase, card.back.lines.length, numPropertiesInLine);
       const insertCardLinesValues = generateInsertLinesValuesArray(card);
   
