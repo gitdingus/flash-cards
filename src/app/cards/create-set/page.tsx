@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { v4 as uuid } from 'uuid';
-import { createSet } from '@/actions/card-actions';
+import { createSet } from '@/actions/set-actions';
 import CardInput from '../../components/set-tools/CardInput';
 
 export default function CreateSet() {

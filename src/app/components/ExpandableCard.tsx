@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { getCardData } from '@/actions/card-actions';
+import { getCardData } from '@/actions/set-actions';
 
 interface Props {
   card: CardBase,
