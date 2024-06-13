@@ -20,7 +20,7 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
   const [ description, setDescription ] = useState(set?.description || '');
   const [ cards, setCards ] = useState<CardBase[]>(set?.cards || []);
   const [ isPublic, setIsPublic ] = useState(set ? set.isPublic : true);
-  const [ activeCard, setActiveCard ] = useState<CardBase | null>();
+  const [ activeCard, setActiveCard ] = useState<CardBase | null>(null);
 
   const compileSetData = () => {
     const set: SetInfoBase = {
@@ -45,12 +45,14 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
   const submitActionWithData = submitAction.bind(null, compileSetData());
 
   const defaultSaveCard = (card: CardBase) => {
+    console.log('defaultSaveCard');
     const newCards = cards.slice();
     newCards.push(card);
     setCards(newCards);
   }
 
   const defaultEditCard = (newCard: CardBase) => {
+    console.log('defaultEditCard');
     const newCards = cards.slice();
     const oldCardIndex = newCards.findIndex((card) => card.id === newCard.id);
 
@@ -138,7 +140,12 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
             activeCard !== null &&
             <CardInput 
               key={activeCard?.id}
-              saveCard={defaultEditCard}
+              saveCard={(newCard) => {
+                defaultEditCard(newCard)
+                if (editCard) {
+                  editCard(newCard);
+                }
+              }}
               removeLine={ removeLine ? removeLine : undefined }
               editLine={ editLine ? editLine : undefined }
               saveLine={ saveLine ? saveLine : undefined }
@@ -147,7 +154,13 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
           }
           {
             activeCard === null &&
-            <CardInput saveCard={defaultSaveCard} />
+            <CardInput 
+              saveCard={(card) => {
+                defaultSaveCard(card)
+                if (saveCard) 
+                  saveCard(card);
+              }} 
+            />
           }
         </div>
         <div>
