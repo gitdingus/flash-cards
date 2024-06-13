@@ -18,7 +18,7 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
   const save = () => {
     const newCard: CardBase = {
       id: card?.id || uuid(),
-      dateCreated: new Date(),
+      dateCreated: card?.dateCreated || new Date(),
       front: { title: cardTitle },
       back: { lines }
     }
