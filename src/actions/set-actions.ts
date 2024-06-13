@@ -178,3 +178,90 @@ export async function saveNewCard(card: CardBase, set: SetInfo) {
     client.release();
   }
 }
+
+export async function removeCard(card: CardInSet) {
+  const [ set, session ] = await Promise.all([
+    sql`SELECT * FROM set WHERE id = ${card.inSet}`,
+    auth(),
+  ]);
+
+  if (!session) {
+    throw new Error('Unauthorized');
+  }
+
+  if (set.rows.length != 1) {
+    throw new Error('Not found');
+  }
+
+  if (set.rows[0].owner !== session.user.userId) {
+    throw new Error('Forbidden');
+  }
+
+  const client = await db.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const linesQuery = await sql`SELECT * FROM cardline WHERE cardid = ${card.id};`;
+    
+    await Promise.all(
+      linesQuery.rows.map((line) => 
+        client.query(`DELETE FROM cardline WHERE id = $1`, [line.id])
+      ),
+    );
+
+    await client.query(`DELETE FROM card WHERE id = $1`, [card.id]);
+
+    await client.query('COMMIT');
+  } catch (err) {
+    console.log(err);
+    await client.query('ROLLBACK');
+  } finally {
+    client.release();
+  }
+}
+
+export async function editCardTitle(card: CardInSet) {
+  const [ set, session ] = await Promise.all([
+    sql`SELECT * FROM set WHERE id = ${card.inSet}`,
+    auth(),
+  ]);
+
+  if (!session) {
+    throw new Error('Unauthorized');
+  }
+
+  if (set.rows.length != 1) {
+    throw new Error('Not found');
+  }
+
+  if (set.rows[0].owner !== session.user.userId) {
+    throw new Error('Forbidden');
+  }
+
+  await sql`UPDATE card SET title = ${card.front.title} WHERE id = ${card.id}`;
+}
+
+export async function updateSetInformation(set: SetInfoBase) {
+  console.log(set);
+  const [ setOwner, session ] = await Promise.all([
+    sql`SELECT owner FROM set WHERE id = ${set.id};`,
+    auth(),
+  ]);
+
+  console.log(setOwner);
+  if (!session) {
+    throw new Error('Unauthorized');
+  }
+
+  if (setOwner.rows.length !== 1) {
+    throw new Error('Not found');
+  }
+
+  if (session.user.userId != setOwner.rows[0].owner) {
+    throw new Error('Forbidden');
+  }
+
+  await sql`UPDATE set SET name = ${set.title}, description = ${set.description}, public = ${set.isPublic} WHERE id = ${set.id};`;
+
+}
