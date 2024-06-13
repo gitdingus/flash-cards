@@ -131,3 +131,50 @@ export async function saveNewLine(line: Line, card: CardBase) {
   `;
 }
 
+export async function saveNewCard(card: CardBase, set: SetInfo) {
+  const [client, session] = await Promise.all([
+    db.connect(),
+    auth(),
+  ]);
+
+  if (!session || session.user.userId !== set.owner) {
+    throw new Error('Unauthorized');
+  }
+
+  const cardInSet: CardInSet = {
+    ...card,
+    inSet: set.id,
+  }
+
+  console.log(cardInSet);
+  try {  
+    await client.query('BEGIN');
+
+    await client.query(`
+      INSERT INTO card (id, inset, datecreated, title) VALUES ($1, $2, $3, $4);`,
+      [
+        cardInSet.id, 
+        cardInSet.inSet, 
+        cardInSet.dateCreated, 
+        cardInSet.front.title
+      ]
+    );
+
+    console.log('inserted into card');
+
+    const insertCardLinesBase = `INSERT INTO cardline (id, cardid, heading, content) VALUES`;
+    const numPropertiesInLine = 4;
+    const insertCardLinesQuery = generateInsertQuery(insertCardLinesBase, cardInSet.back.lines.length, numPropertiesInLine);
+    const insertCardLinesValues = generateInsertLinesValuesArray(cardInSet);
+
+    await client.query(insertCardLinesQuery, insertCardLinesValues);
+
+    console.log('inserted lines');
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.log(err);
+  } finally {
+    client.release();
+  }
+}
