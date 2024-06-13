@@ -43,7 +43,7 @@ function generateInsertLinesValuesArray(card: CardInSet) {
   return values;
 }
 
-export async function createSet({ set, cardsInSet }: { set: SetInfo, cardsInSet: CardInSet[] }, formData: FormData) {
+export async function createSet({ set, cardsInSet }: { set: SetInfoBase, cardsInSet: CardInSet[] }, formData: FormData) {
   const [ client, session ] = await Promise.all([
     db.connect(),
     auth(),
