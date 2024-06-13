@@ -45,14 +45,12 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
   const submitActionWithData = submitAction.bind(null, compileSetData());
 
   const defaultSaveCard = (card: CardBase) => {
-    console.log('defaultSaveCard');
     const newCards = cards.slice();
     newCards.push(card);
     setCards(newCards);
   }
 
   const defaultEditCard = (newCard: CardBase) => {
-    console.log('defaultEditCard');
     const newCards = cards.slice();
     const oldCardIndex = newCards.findIndex((card) => card.id === newCard.id);
 
