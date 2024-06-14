@@ -1,7 +1,7 @@
 import NextAuth, { type DefaultSession } from "next-auth";
 import Credentials from 'next-auth/providers/credentials';
 import { verifyPassword } from '@/utils/passwords';
-import { getUser } from '@/app/lib/accounts';
+import { getSensitiveUser } from '@/app/lib/accounts';
 
 declare module 'next-auth' {
   interface Session {
@@ -32,16 +32,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        const userRow = await getUser(credentials.username);
+        const userRow = await getSensitiveUser(credentials.username);
+
+        if (!userRow) {
+          throw new Error('Not Found');
+        }
+
         const user = {
           userId: userRow.id,
           username: userRow.username,
           email: userRow.email,
           salt: userRow.salt,
           passwordhash: userRow.passwordhash,
-        }
-        if (!user) {
-          return null;
         }
 
         const allowed = verifyPassword(credentials.password, user.salt, user.passwordhash);

@@ -20,8 +20,43 @@ export async function emailUsed(email: string) {
 }
 
 export async function getUser(username: string) {
-  const user = await sql`SELECT * FROM users WHERE username = ${username};`;
-  return user.rows[0];
+  const userQuery = await sql`SELECT * FROM users WHERE username = ${username};`;
+  
+  if (userQuery.rowCount !== 1) {
+    return null;
+  }
+
+  const userRecord = userQuery.rows[0];
+
+  const user: PublicUser = {
+    id: userRecord.id,
+    dateCreated: userRecord.datecreated,
+    username: userRecord.username,
+    email: userRecord.email,  
+  }
+
+  return user;  
+}
+
+export async function getSensitiveUser(username: string) {
+  const userQuery = await sql`SELECT * FROM users WHERE username = ${username};`;
+  
+  if (userQuery.rowCount !== 1) {
+    return null;
+  }
+
+  const userRecord = userQuery.rows[0];
+
+  const user: UserRecord = {
+    id: userRecord.id,
+    datecreated: userRecord.datecreated,
+    username: userRecord.username,
+    email: userRecord.email, 
+    salt: userRecord.salt,
+    passwordhash: userRecord.passwordhash,
+  }
+
+  return user;  
 }
 
 export async function getUserById(id: string) {
