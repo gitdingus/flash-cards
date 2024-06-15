@@ -47,7 +47,7 @@ export async function getSet(id: string) {
   return setOfCards;
 }
 
-export async function getSets() {
+export async function getAllPublicSets() {
   const result = await sql`
     SELECT * FROM set WHERE public = 'true';
   `; 
@@ -100,6 +100,6 @@ export async function populateSets(showOwnSets: boolean) {
     case true: 
       return await getOwnSets();
     default:
-      return await getSets();
+      return await getAllPublicSets();
   }
 }
