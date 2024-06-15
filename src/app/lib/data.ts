@@ -95,6 +95,71 @@ export async function getOwnSets() {
   return sets;
 }
 
+export async function getUsersPublicSets(userId: string) {
+  const setQuery = await sql`SELECT * FROM set WHERE owner = ${userId} AND public = true;`;
+  const sets: SetInfoBase[] = setQuery.rows.map((setRecord) => {
+    const set: SetInfoBase = {
+      id: setRecord.id,
+      title: setRecord.name,
+      description: setRecord.description,
+      dateCreated: setRecord.datecreated,
+      isPublic: setRecord.public,
+    }
+
+    return set;
+  });
+
+  return sets;
+}
+
+export async function getAllowedSetsFromUser(userId: string) {
+  //returns all public sets and sets that logged in user is allowed to see
+  const session = await auth();
+
+  if (!session) {
+    return getUsersPublicSets(userId);
+  }
+
+  if (session.user.userId === userId) {
+    return getOwnSets();
+  }
+
+  const allowedSetsQuery = await sql`
+    SELECT * 
+    FROM set 
+    WHERE owner = ${userId}
+      AND public = true
+
+    UNION
+
+    SELECT *
+    FROM set
+    WHERE 
+      owner = ${userId}
+      AND id IN (
+        SELECT setid
+        FROM setpermission
+        WHERE
+          setpermission.setid = set.id 
+      )
+    ;
+  `;
+
+  const sets: SetInfoBase[] = allowedSetsQuery.rows.map((setRecord) => {
+    const set: SetInfoBase = {
+      id: setRecord.id,
+      title: setRecord.name,
+      description: setRecord.description,
+      dateCreated: setRecord.datecreated,
+      isPublic: setRecord.public,
+    };
+
+    return set;
+  });
+
+  return sets;
+}
+
 export async function populateSets(showOwnSets: boolean) {
   switch (showOwnSets) {
     case true: 
