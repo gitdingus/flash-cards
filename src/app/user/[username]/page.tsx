@@ -32,10 +32,12 @@ export default async function User({ params : { username }}: UserParams) {
                   <p>
                     <span><a href={`/set/${set.id}`}>{set.title}</a>:</span> <span>{set.description}</span>
                   </p>
-                  <SetPermissions 
-                    set={set} 
-                    allowedUsers={[]} 
-                  />
+                  {
+                    ownProfile && 
+                    <SetPermissions 
+                      set={set} 
+                    />
+                  }
                 </div>
               </li>
             ))
