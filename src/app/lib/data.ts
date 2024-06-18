@@ -1,5 +1,6 @@
 'use server';
 import { sql, db } from '@vercel/postgres';
+import { getUserById } from '@/app/lib/accounts';
 import { auth } from '@/auth';
 
 export async function getSet(id: string) {
@@ -45,6 +46,26 @@ export async function getSet(id: string) {
   }
 
   return setOfCards;
+}
+
+export async function getSetInfo(id: string) {
+  const setQuery = await sql`SELECT * FROM set WHERE id = ${id}`;
+
+  if (setQuery.rowCount = 0) {
+    return null;
+  }
+
+  const setRecord = setQuery.rows[0];
+  const set: SetInfo = {
+    owner: setRecord.owner,
+    id: setRecord.id,
+    title: setRecord.name,
+    description: setRecord.description,
+    dateCreated: setRecord.datecreated,
+    isPublic: setRecord.public,
+  }
+
+  return set;
 }
 
 export async function getAllPublicSets() {
@@ -132,16 +153,14 @@ export async function getAllowedSetsFromUser(userId: string) {
 
     UNION
 
-    SELECT *
+    SELECT set.id, name, description, datecreated, owner, public
     FROM set
+    JOIN setpermission
+      ON setpermission.setid = set.id
     WHERE 
       owner = ${userId}
-      AND id IN (
-        SELECT setid
-        FROM setpermission
-        WHERE
-          setpermission.setid = set.id 
-      )
+      AND setpermission.userid = ${session.user.userId}
+      AND setpermission.granted = true
     ;
   `;
 
@@ -158,6 +177,39 @@ export async function getAllowedSetsFromUser(userId: string) {
   });
 
   return sets;
+}
+
+export async function getAllowedUsersOfSet(setId: string) {
+  const [ set, session ] = await Promise.all([
+    getSetInfo(setId),
+    auth(),
+  ]);
+
+  if (!session) {
+    throw new Error('Unauthorized');
+  }
+
+  if (!set) {
+    throw new Error('Not found');
+  }
+
+  if (set.owner !== session.user.userId) {
+    throw new Error('Forbidden');
+  }
+
+  const allowedUsersQuery = await sql`
+    SELECT * FROM setpermission WHERE setid = ${setId};
+  `;
+
+  if (allowedUsersQuery.rowCount === 0) {
+    return [];
+  }
+
+  const users = await Promise.all(allowedUsersQuery.rows.map((user) => {
+    return getUserById(user.userid);
+  }));
+
+  return users;
 }
 
 export async function populateSets(showOwnSets: boolean) {
