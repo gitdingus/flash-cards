@@ -63,7 +63,7 @@ export async function getUserById(id: string) {
   const userQuery = await sql`SELECT * FROM users WHERE id = ${id}`;
 
   if (userQuery.rows.length != 1) {
-    return null;
+    throw new Error('Not found');
   }
 
   const userRecord = userQuery.rows[0];
