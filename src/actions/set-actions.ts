@@ -1,6 +1,9 @@
 'use server';
 import { db, sql } from '@vercel/postgres';
+import { getSetInfo } from '@/app/lib/data';
+import { getUser, getUserById } from '@/app/lib/accounts';
 import { auth } from '@/auth';
+import { v4 as uuid } from 'uuid';
 
 function generateInsertQuery(base: string, numRows: number, numFields: number) {
   const valuesArr = [];
@@ -25,7 +28,6 @@ function generateInsertQuery(base: string, numRows: number, numFields: number) {
 
 function generateInsertCardsValuesArray(cards: CardInSet[]) {
   const values: string[] = [];
-
   cards.forEach((card) => {
     values.push(card.id, card.inSet, card.dateCreated.toISOString(), card.front.title);
   });
@@ -255,3 +257,60 @@ export async function updateSetInformation(set: SetInfoBase) {
   await sql`UPDATE set SET name = ${set.title}, description = ${set.description}, public = ${set.isPublic} WHERE id = ${set.id};`;
 
 }
+
+export async function setVisibility(formData: FormData) {
+  const setId = formData.get('setId') as string;
+
+  if (!setId) {
+    return null;
+  }
+
+  const [ set, session ] = await Promise.all([
+    getSetInfo(setId),
+    auth(),
+  ]);
+  
+  if (!set) {
+    throw new Error('Not Found');
+  }
+
+  if (!session) {
+    throw new Error('Unauthorized');
+  }
+
+  if (session.user.userId !== set.owner) {
+    throw new Error('Forbidden');
+  }
+
+  if (formData.get('visibility') === 'public') {
+    await sql`UPDATE set SET public = true WHERE id = ${set.id}`;
+  } else if (formData.get('visibility') === 'private') {
+    const client = await db.connect();
+
+    await client.sql`UPDATE set SET public = false WHERE id = ${set.id}`;
+
+    const userField = formData.get('user') as string;
+    let user; 
+
+    if (userField){
+      switch (formData.get('permissions')) {
+        case 'allow':
+          user = await getUser(userField);
+          await client.sql`
+            INSERT INTO setpermission (id, setid, userid, granted)
+            VALUES (${uuid()}, ${set.id}, ${user.id}, true);
+          `;
+          break;
+        case 'revoke':
+          user = await getUserById(userField);
+          await client.sql`
+            DELETE FROM setpermission WHERE setid = ${set.id} AND userid = ${user.id};
+          `;
+          break;
+      }
+    }
+
+  }
+
+}
+
