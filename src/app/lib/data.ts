@@ -212,11 +212,47 @@ export async function getAllowedUsersOfSet(setId: string) {
   return users;
 }
 
-export async function populateSets(showOwnSets: boolean) {
-  switch (showOwnSets) {
-    case true: 
+export async function populateSets(formData: FormData) {
+  const setType = formData.get('set-type') as string;
+
+  switch (setType) {
+    case 'own':
       return await getOwnSets();
-    default:
+    case 'private': 
+      return await getAllowedPrivateSets();
+    case 'public':
+    default: 
       return await getAllPublicSets();
   }
+}
+
+async function getAllowedPrivateSets() {
+  const [ session ] = await Promise.all([
+    auth(),
+  ]);
+
+  if (!session) {
+    throw new Error('Unauthorized');
+  }
+
+  const setQuery = await sql`
+    SELECT * FROM set
+    JOIN setpermission
+      ON set.id = setpermission.setid
+    WHERE set.public = false
+      AND setpermission.userid = ${session.user.userId};
+  `;
+
+  return setQuery.rows.map((row) => {
+    const set: SetInfo = {
+      owner: row.owner,
+      id: row.id,
+      title: row.name,
+      description: row.description,
+      dateCreated: row.datecreated,
+      isPublic: row.public,
+    }
+
+    return set;
+  });
 }
