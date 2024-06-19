@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 import { populateSets } from '../lib/data';
 
 interface SetListProps {
@@ -8,25 +8,46 @@ interface SetListProps {
 
 export default function SetList({ initialSets }: SetListProps) {
   const [ sets, setSets ] = useState<SetInfo[]>(initialSets);
-  const [ showOwnSets, setShowOwnSets ] = useState(false);
-
-  useEffect(() => {
-    populateSets(showOwnSets)
-      .then((sets) => {
-        setSets(sets);
-      });
-  }, [showOwnSets]);
-
+  const form = useRef<HTMLFormElement>(null);
   return (
     <div>
       <h1>Sets</h1>
-      <form>
-        <label>
-          Show only my Sets
-          <input type="checkbox" name="showOwnSets" checked={showOwnSets} onChange={(e) => {
-            setShowOwnSets(!showOwnSets);
-          }} />
-        </label>
+      <form 
+        ref={form}
+        action={async (formData: FormData) => {
+          setSets(await populateSets(formData));
+        }}
+      >
+        <fieldset>
+          <legend>View sets</legend>
+          <label>
+            <input 
+              type="radio" 
+              name="set-type" 
+              value="public" 
+              onClick={(e) => { form.current?.requestSubmit() }}
+              defaultChecked/>
+            Public
+          </label>
+          <label>
+            <input 
+              type="radio" 
+              name="set-type" 
+              value="private" 
+              onClick={(e) => { form.current?.requestSubmit() }}
+            />
+            Private
+          </label>
+          <label>
+            <input
+              type="radio" 
+              name="set-type" 
+              value="own" 
+              onClick={(e) => { form.current?.requestSubmit() }}
+            />
+            My sets
+          </label>
+        </fieldset>
       </form>
       {
         sets.map((set) => {
