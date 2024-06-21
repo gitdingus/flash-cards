@@ -49,6 +49,7 @@ export default function Authentication({ session }: any) {
       return (
         <div>
           <p>Logged in as <a href={`/user/${session.user.username}`}>{session.user.username}</a></p>
+          <p><a href='/user/settings/'>Settings</a></p>
           <button onClick={async () => { await signOut() }}>Logout</button>
         </div>
       )
