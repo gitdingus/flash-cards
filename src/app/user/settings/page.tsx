@@ -1,5 +1,6 @@
 import { auth } from '@/auth';
 import ChangePasswordForm from "@/app/components/account-tools/ChangePasswordForm";
+import ChangeEmailForm from '@/app/components/account-tools/ChangeEmailForm';
 
 export default async function UserSettings() { 
   const session = await auth();
@@ -11,13 +12,7 @@ export default async function UserSettings() {
   return (
     <div>
       <ChangePasswordForm />
-      <form>
-        <label>
-          New Email 
-          <input type="email" name="new-email" />
-        </label>
-        <button type="submit">Change Email</button>
-      </form>
+      <ChangeEmailForm />
     </div>
   )
 }
