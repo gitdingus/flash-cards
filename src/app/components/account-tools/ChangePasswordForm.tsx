@@ -23,7 +23,7 @@ export default function ChangePasswordForm() {
         }
         <label>
           Current password
-          <input type="password" name="current-password" />
+          <input type="password" name="current-password" ref={currentPassword}/>
         </label>
         {
           formState.currentPassword &&
