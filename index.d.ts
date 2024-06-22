@@ -74,3 +74,8 @@ interface ChangePasswordFormState {
   newPassword?: string,
   confirmPassword?: string,
 }
+
+interface ChangeEmailFormState {
+  form?: string,
+  newEmail?: string,
+}
