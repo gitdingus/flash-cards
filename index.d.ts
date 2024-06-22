@@ -67,3 +67,10 @@ interface PublicUser {
   email: string,
   dateCreated: string,
 }
+
+interface ChangePasswordFormState {
+  form?: string,
+  currentPassword?: string,
+  newPassword?: string,
+  confirmPassword?: string,
+}
