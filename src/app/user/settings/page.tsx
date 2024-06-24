@@ -1,4 +1,5 @@
 import { auth } from '@/auth';
+import { SessionProvider } from 'next-auth/react';
 import ChangePasswordForm from "@/app/components/account-tools/ChangePasswordForm";
 import ChangeEmailForm from '@/app/components/account-tools/ChangeEmailForm';
 
@@ -12,7 +13,9 @@ export default async function UserSettings() {
   return (
     <div>
       <ChangePasswordForm />
-      <ChangeEmailForm />
+      <SessionProvider session={session}>
+        <ChangeEmailForm />
+      </SessionProvider>
     </div>
   )
 }
