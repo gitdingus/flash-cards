@@ -68,3 +68,35 @@ export async function changePassword(initialState: ChangePasswordFormState, form
 
   return response;
 }
+
+export async function changeEmail(initialState: ChangeEmailFormState, formData: FormData) {
+  const session = await auth();
+
+  if (!session) {
+    throw new Error('Unauthorized');
+  }
+
+  const response: ChangeEmailFormState = {};
+  const newEmail = formData.get('new-email') as string;
+
+  if (!newEmail) {
+    response.newEmail = 'Must provide new email address';
+    return response;
+  }
+
+  try {
+    await sql`
+      UPDATE users
+      SET email = ${newEmail}
+      WHERE id = ${session.user.userId};
+    `;
+  } catch (err) {
+    response.form = 'There has been an error processing your request';
+    return response;
+  }
+
+  response.form = 'Email address has been updated successfully';
+  response.data = { email: newEmail };
+
+  return response;
+}
