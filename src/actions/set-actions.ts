@@ -4,6 +4,7 @@ import { getSetInfo } from '@/app/lib/data';
 import { getUser, getUserById } from '@/app/lib/accounts';
 import { auth } from '@/auth';
 import { v4 as uuid } from 'uuid';
+import { createNotification } from '@/app/lib/notifications';
 
 function generateInsertQuery(base: string, numRows: number, numFields: number) {
   const valuesArr = [];
@@ -282,35 +283,90 @@ export async function setVisibility(formData: FormData) {
     throw new Error('Forbidden');
   }
 
+  const setOwner = await getUserById(set.owner);
+
   if (formData.get('visibility') === 'public') {
     await sql`UPDATE set SET public = true WHERE id = ${set.id}`;
   } else if (formData.get('visibility') === 'private') {
     const client = await db.connect();
 
-    await client.sql`UPDATE set SET public = false WHERE id = ${set.id}`;
+    try {
+      await client.query('BEGIN');
+      await client.query(
+        `UPDATE set SET public = false WHERE id = $1`,
+        [set.id]
+      );
 
-    const userField = formData.get('user') as string;
-    let user; 
+      const userField = formData.get('user') as string;
+      let user; 
+  
+      if (userField){
+        switch (formData.get('permissions')) {
+          case 'allow':
+            user = await getUser(userField);
+            const allowNotification = createNotification({
+              type: 'set-permission-granted',
+              recipient: user,
+              content: `You have been granted access to the set ${set.title} by ${setOwner.username}!`
+            });
 
-    if (userField){
-      switch (formData.get('permissions')) {
-        case 'allow':
-          user = await getUser(userField);
-          await client.sql`
-            INSERT INTO setpermission (id, setid, userid, granted)
-            VALUES (${uuid()}, ${set.id}, ${user.id}, true);
-          `;
-          break;
-        case 'revoke':
-          user = await getUserById(userField);
-          await client.sql`
-            DELETE FROM setpermission WHERE setid = ${set.id} AND userid = ${user.id};
-          `;
-          break;
+            await client.query(
+              `INSERT INTO setpermission (id, setid, userid, granted)
+               VALUES ($1, $2, $3, $4);`,
+              [uuid(), set.id, user.id, true]
+            );
+            
+            await client.query(
+              `INSERT INTO notification (id, type, subject, content, recipient, viewed, datecreated)
+              VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+              [ 
+                allowNotification.id, 
+                allowNotification.type,
+                allowNotification.subject,
+                allowNotification.content,
+                allowNotification.recipient.id,
+                allowNotification.viewed,
+                allowNotification.dateCreated,
+              ]
+            );
+            break;
+          case 'revoke':
+            user = await getUserById(userField);
+            const revokeNotification = createNotification({
+              type: 'set-permission-revoked',
+              recipient: user,
+              content: `Access to set ${set.title} has been revoked by ${setOwner.username}`,
+            });
+
+            await client.query(
+            `DELETE FROM setpermission 
+             WHERE setid = $1
+               AND userid = $2;
+            `, [set.id, user.id]);
+
+            await client.query(
+              `INSERT INTO notification (id, type, subject, content, recipient, viewed, datecreated)
+              VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+              [ 
+                revokeNotification.id, 
+                revokeNotification.type,
+                revokeNotification.subject,
+                revokeNotification.content,
+                revokeNotification.recipient.id,
+                revokeNotification.viewed,
+                revokeNotification.dateCreated,
+              ]
+            );
+            break;
+        }
       }
+      client.query('COMMIT');
+    } catch (err) {
+      console.log(err);
+      client.query('ROLLBACK');
+    } finally {
+      client.release();
     }
-
   }
-
 }
 
