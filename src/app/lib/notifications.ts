@@ -25,7 +25,7 @@ function defaultNotificationSubject(type: NotificationType) {
 export function createNotification({ type, recipient, subject, content }: NotificationConfig) {
   const notification: AppNotification = {
     id: uuid(),
-    type: 'mod-action',
+    type: type,
     subject: defaultNotificationSubject(type) || subject,
     content: content || '', 
     recipient: recipient,
