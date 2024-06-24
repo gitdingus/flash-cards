@@ -236,13 +236,16 @@ async function getAllowedPrivateSets() {
   }
 
   const setQuery = await sql`
-    SELECT * FROM set
-    JOIN setpermission
+    SELECT *
+    FROM setpermission
+    JOIN set
       ON set.id = setpermission.setid
     WHERE set.public = false
-      AND setpermission.userid = ${session.user.userId};
+      AND setpermission.userid = ${session.user.userId}
+      AND setpermission.granted = true;
   `;
 
+  console.log(setQuery);
   return setQuery.rows.map((row) => {
     const set: SetInfo = {
       owner: row.owner,
