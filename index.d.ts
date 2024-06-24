@@ -83,14 +83,19 @@ interface ChangeEmailFormState {
   }
 }
 
-type NotificationType = "mod-action" | "new-follower" | "new-set" | "set-permission";
+type NotificationType = 
+  "mod-action" 
+  | "new-follower" 
+  | "new-set" 
+  | "set-permission-granted" 
+  | "set-permission-revoked";
 
-interface Notification {
+interface AppNotification {
   id: string,
   type: NotificationType,
   subject: string,
   content: string,
-  recipient: string,
+  recipient: PublicUser,
   viewed: boolean,
   dateCreated: Date,
 }
