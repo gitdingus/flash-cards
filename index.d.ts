@@ -82,3 +82,15 @@ interface ChangeEmailFormState {
     email?: string,
   }
 }
+
+type NotificationType = "mod-action" | "new-follower" | "new-set" | "set-permission";
+
+interface Notification {
+  id: string,
+  type: NotificationType,
+  subject: string,
+  content: string,
+  recipient: string,
+  viewed: boolean,
+  dateCreated: Date,
+}
