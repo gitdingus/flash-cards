@@ -78,4 +78,7 @@ interface ChangePasswordFormState {
 interface ChangeEmailFormState {
   form?: string,
   newEmail?: string,
+  data?: {
+    email?: string,
+  }
 }
