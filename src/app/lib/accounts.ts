@@ -5,7 +5,7 @@ import { v4 as uuid } from 'uuid';
 
 export async function duplicateUsername(username: string) {
   const findUsername = await sql`
-    SELECT username FROM users WHERE username = ${username};
+    SELECT username FROM users WHERE LOWER(username) = LOWER(${username});
   `;
 
   return findUsername.rows.length > 0;
@@ -13,14 +13,14 @@ export async function duplicateUsername(username: string) {
 
 export async function emailUsed(email: string) {
   const findEmail = await sql`
-    SELECT email FROM users WHERE email = ${email};
+    SELECT email FROM users WHERE LOWER(email) = LOWER(${email});
   `;
 
   return findEmail.rows.length > 0;
 }
 
 export async function getUser(username: string) {
-  const userQuery = await sql`SELECT * FROM users WHERE username = ${username};`;
+  const userQuery = await sql`SELECT * FROM users WHERE LOWER(username) = LOWER(${username});`;
   
   if (userQuery.rowCount !== 1) {
     throw new Error('not found');
@@ -39,7 +39,7 @@ export async function getUser(username: string) {
 }
 
 export async function getSensitiveUser(username: string) {
-  const userQuery = await sql`SELECT * FROM users WHERE username = ${username};`;
+  const userQuery = await sql`SELECT * FROM users WHERE LOWER(username) = LOWER(${username});`;
   
   if (userQuery.rowCount !== 1) {
     return null;
