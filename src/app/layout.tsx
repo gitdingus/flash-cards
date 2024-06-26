@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import Authentication from './components/Authentication';
+import Authentication from '@/app/components/Authentication';
+import NotificationWidget from '@/app/components/notification-tools/NotificationWidget';
 import { auth } from '@/auth';
 
 export const metadata = {
@@ -16,6 +17,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const session = await auth();
+
   return (
     <html lang="en">
       <body>
@@ -38,6 +40,10 @@ export default async function RootLayout({
           </nav>
           <div>
             <Authentication session={session} />
+            {
+              session &&
+              <NotificationWidget session={session} />
+            }
           </div>
         </header>
         {children}
