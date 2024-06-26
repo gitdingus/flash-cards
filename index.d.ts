@@ -90,12 +90,15 @@ type NotificationType =
   | "set-permission-granted" 
   | "set-permission-revoked";
 
-interface AppNotification {
+interface NotificationBase {
   id: string,
   type: NotificationType,
   subject: string,
-  content: string,
-  recipient: PublicUser,
+  content: string, 
   viewed: boolean,
-  dateCreated: Date,
+  dateCreated: Date, 
+}
+
+interface AppNotification extends NotificationBase {
+  recipient: PublicUser,
 }
