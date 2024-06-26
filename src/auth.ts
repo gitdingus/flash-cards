@@ -1,4 +1,4 @@
-import NextAuth, { type DefaultSession } from "next-auth";
+import NextAuth, { CredentialsSignin, type DefaultSession } from "next-auth";
 import Credentials from 'next-auth/providers/credentials';
 import { verifyPassword } from '@/utils/passwords';
 import { getSensitiveUser } from '@/app/lib/accounts';
@@ -35,7 +35,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const userRow = await getSensitiveUser(credentials.username);
 
         if (!userRow) {
-          throw new Error('Not Found');
+          throw new CredentialsSignin('Invalid username and/or password');
         }
 
         const user = {
