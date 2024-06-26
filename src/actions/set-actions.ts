@@ -5,6 +5,7 @@ import { getUser, getUserById } from '@/app/lib/accounts';
 import { auth } from '@/auth';
 import { v4 as uuid } from 'uuid';
 import { createNotification } from '@/app/lib/notifications';
+import { headers } from 'next/headers';
 
 function generateInsertQuery(base: string, numRows: number, numFields: number) {
   const valuesArr = [];
@@ -298,16 +299,18 @@ export async function setVisibility(formData: FormData) {
       );
 
       const userField = formData.get('user') as string;
+      const baseUrl = headers().get('host');
       let user; 
   
       if (userField){
         switch (formData.get('permissions')) {
           case 'allow':
             user = await getUser(userField);
+            let acceptContentMarkdown = `You have been granted access to the set [${set.title}](${baseUrl}/set/${set.id}) by [${setOwner.username}](${baseUrl}/user/${setOwner.username})!`;
             const allowNotification = createNotification({
               type: 'set-permission-granted',
               recipient: user,
-              content: `You have been granted access to the set ${set.title} by ${setOwner.username}!`
+              content: acceptContentMarkdown,
             });
 
             await client.query(
@@ -332,10 +335,11 @@ export async function setVisibility(formData: FormData) {
             break;
           case 'revoke':
             user = await getUserById(userField);
+            let rejectContentMarkdown = `Access to set [${set.title}](${baseUrl}/set/${set.id}) has been revoked by [${setOwner.username}](${baseUrl}/user/${setOwner.username}).`;
             const revokeNotification = createNotification({
               type: 'set-permission-revoked',
               recipient: user,
-              content: `Access to set ${set.title} has been revoked by ${setOwner.username}`,
+              content: rejectContentMarkdown,
             });
 
             await client.query(
