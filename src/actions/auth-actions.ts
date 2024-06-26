@@ -17,6 +17,7 @@ interface CreateAccountState extends Array<FormError> {};
 
 export async function createAccount(prevState: CreateAccountState, formData: FormData) {
   const messages: CreateAccountState = [];
+  const unallowedUsernameCharactersRegEx = /[^A-Za-z0-9-_]/;
   const username = formData.get('username')?.toString();
   const password = formData.get('password')?.toString();
   const confirmPassword = formData.get('confirm_password')?.toString();
@@ -24,6 +25,8 @@ export async function createAccount(prevState: CreateAccountState, formData: For
 
   if (!username || username.length < 5) {
     messages.push({ field: 'username', message: 'Username must be 5 or more characters' });
+  } else if (username.match(unallowedUsernameCharactersRegEx)) {
+    messages.push({ field: 'username', message: `Username can only contain alphanumeric characters and - or _` })
   } else if (await duplicateUsername(username) === true) {
     messages.push({ field: 'username', message: `Username ${username} is already taken` });
   }
