@@ -1,3 +1,5 @@
+import { auth } from '@/auth';
+import { sql } from '@vercel/postgres';
 import { v4 as uuid } from 'uuid';
 
 interface NotificationConfig {
@@ -34,4 +36,39 @@ export function createNotification({ type, recipient, subject, content }: Notifi
   }
 
   return notification;
+}
+
+export async function getUnreadNotifications(userId: string) {
+  const session = await auth();
+
+  if (!session) {
+    throw new Error('Unauthorized');
+  }
+
+  if (session.user.userId !== userId) {
+    throw new Error('Forbidden');
+  }
+
+  const unreadNotificationsQuery = await sql`
+    SELECT *
+    FROM notification
+    WHERE recipient = ${userId};
+  `;
+
+  const notifications: NotificationBase[] = unreadNotificationsQuery.rows.map(
+    (notificationRow) => {
+      const notification: NotificationBase = {
+        id: notificationRow.id,
+        type: notificationRow.type,
+        subject: notificationRow.subject,
+        content: notificationRow.content,
+        viewed: notificationRow.viewed,
+        dateCreated: new Date(notificationRow.datecreated),
+      }
+
+      return notification;
+    }
+  );
+
+  return notifications;
 }
