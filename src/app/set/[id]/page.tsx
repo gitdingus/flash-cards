@@ -2,6 +2,7 @@ import { sql } from '@vercel/postgres';
 import { getSet } from '@/app/lib/data';
 import { getUserById } from '@/app/lib/accounts';
 import { auth } from '@/auth';
+import { hasAccessToSet } from '@/app/lib/permissions';
 import ExpandableCard from '@/app/components/ExpandableCard';
 
 export default async function SetInfo({ params }: { params: { id: string } }) {
@@ -15,6 +16,12 @@ export default async function SetInfo({ params }: { params: { id: string } }) {
   }
   
   const owner = await getUserById(set.owner);
+
+  if (set.isPublic === false) {
+    if (!session || !(await hasAccessToSet(set.owner, session.user.userId, set.id))) {
+      return <div>Not allowed</div>
+    }
+  }
 
   return (
     <div>
