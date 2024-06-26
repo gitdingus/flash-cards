@@ -52,7 +52,8 @@ export async function getUnreadNotifications(userId: string) {
   const unreadNotificationsQuery = await sql`
     SELECT *
     FROM notification
-    WHERE recipient = ${userId};
+    WHERE recipient = ${userId}
+    ORDER BY datecreated DESC;
   `;
 
   const notifications: NotificationBase[] = unreadNotificationsQuery.rows.map(
