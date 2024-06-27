@@ -38,7 +38,13 @@ export function createNotification({ type, recipient, subject, content }: Notifi
   return notification;
 }
 
-export async function getUnreadNotifications(userId: string) {
+export interface GetNotificationsConfig {
+  limit?: number,
+  offset?: number, 
+  viewed?: boolean,
+}
+
+export async function getNotifications(userId: string, configOptions?: GetNotificationsConfig) {
   const session = await auth();
 
   if (!session) {
@@ -49,14 +55,52 @@ export async function getUnreadNotifications(userId: string) {
     throw new Error('Forbidden');
   }
 
-  const unreadNotificationsQuery = await sql`
+  let limit = null;
+  let offset = 0;
+
+  if (configOptions) {
+    if (configOptions.limit) {
+      limit = configOptions.limit + 1;
+    }
+
+    if (configOptions.offset) {
+      offset = configOptions.offset;
+    }
+  }
+
+  let notificationsQuery;
+
+  const unreadNotificationsQuery = sql`
     SELECT *
     FROM notification
     WHERE recipient = ${userId}
-    ORDER BY datecreated DESC;
-  `;
+      AND viewed = false
+    ORDER BY datecreated DESC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  ;`;
 
-  const notifications: NotificationBase[] = unreadNotificationsQuery.rows.map(
+  const allNotificationsQuery = sql`
+    SELECT *
+    FROM notification
+    WHERE recipient = ${userId}
+    ORDER BY datecreated DESC
+    LIMIT ${limit}
+    OFFSET ${offset}
+  ;`;
+
+  switch (configOptions?.viewed) {
+    case false:
+      notificationsQuery = await unreadNotificationsQuery;
+      break;
+    default:
+      notificationsQuery = await allNotificationsQuery;
+      break;
+  }
+
+  const notifications: NotificationBase[] = notificationsQuery.rows
+  .filter((row, index) => limit === null || (limit !== null && index < limit - 1))
+  .map(
     (notificationRow) => {
       const notification: NotificationBase = {
         id: notificationRow.id,
@@ -71,5 +115,8 @@ export async function getUnreadNotifications(userId: string) {
     }
   );
 
-  return notifications;
+  return {
+    notifications,
+    hasMore: notificationsQuery.rowCount > notifications.length,
+  };
 }
