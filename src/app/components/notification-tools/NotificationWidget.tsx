@@ -1,10 +1,9 @@
 import { Session } from "next-auth"
-import { getUnreadNotifications } from "@/app/lib/notifications"
-import { headers } from "next/headers";
+import { getNotifications } from "@/app/lib/notifications"
 import LinkMarkDownTransformer from "@/app/components/markdown-components/LinkMarkDownTransformer";
 
 export default async function NotificationWidget({ session }: { session: Session }) {
-  const notifications = await getUnreadNotifications(session.user.userId);
+  const { notifications, hasMore } = await getNotifications(session.user.userId, { limit: 5, viewed: false });
 
   if (notifications.length === 0) {
     return <div>No new notifications</div>
@@ -25,6 +24,7 @@ export default async function NotificationWidget({ session }: { session: Session
             })
           }
         </ul>
+        <p><a href='/user/notifications'>{`View ${hasMore ? 'more' : 'all'} notifications`}</a></p>
       </div>
     )
   }
