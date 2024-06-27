@@ -1,3 +1,4 @@
+'use server';
 import { sql } from '@vercel/postgres';
 
 export async function hasAccessToSet(ownerId: string, userId: string, setId: string) {
