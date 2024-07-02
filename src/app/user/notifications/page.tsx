@@ -1,3 +1,4 @@
+import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { populateNotifications } from "@/actions/notification-actions";
 import Notification from '@/app/components/notification-tools/Notification';
@@ -11,14 +12,17 @@ interface NotificationProps {
 }
 
 export default async function Notifications(props: NotificationProps) {
+  const session = await auth();
+
+  if (!session) {
+    return <div>Log in to view your notifications</div>
+  }
   const DEFAULT_PAGE_NUM = 0;
   const DEFAULT_RESULT_COUNT = 10;
   let page = Number.parseInt(props.searchParams.page) || DEFAULT_PAGE_NUM;
   let results = Number.parseInt(props.searchParams.results) || DEFAULT_RESULT_COUNT;
-
-
   let { notifications, hasMore } = await populateNotifications({ page, results })
-
+  
   const buildSearchParams = async (targetPage: number, targetResults: number) => {
     'use server';
     const searchParams = new URLSearchParams();
