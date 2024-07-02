@@ -4,15 +4,14 @@ import { headers } from 'next/headers';
 
 interface LinkMarkDownTransformerConfig {
   text: string,
+  baseUrl: string | null, 
 }
 
-export default function LinkMarkDownTransformer({ text }: LinkMarkDownTransformerConfig){
-  let baseUrl = headers().get('host');
-  const elements = [];
-
-  if (!baseUrl) {
-    return
+export default function LinkMarkDownTransformer({ text, baseUrl }: LinkMarkDownTransformerConfig){
+  if (baseUrl === null) {
+    return <p>{text}</p>
   }
+  const elements = [];
 
   const links = getLinksFromMarkdown(baseUrl, text);
   let link = links.next();
