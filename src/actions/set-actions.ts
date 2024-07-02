@@ -4,7 +4,7 @@ import { getSetInfo } from '@/app/lib/data';
 import { getUser, getUserById } from '@/app/lib/accounts';
 import { auth } from '@/auth';
 import { v4 as uuid } from 'uuid';
-import { createNotification } from '@/app/lib/notifications';
+import { createNotification } from '@/utils/notification';
 import { headers } from 'next/headers';
 
 function generateInsertQuery(base: string, numRows: number, numFields: number) {
