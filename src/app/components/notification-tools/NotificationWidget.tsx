@@ -37,8 +37,7 @@ export default function NotificationWidget({ session }: NotificationWidgetConfig
     return (
       <div>
         { 
-          moreNotifications === true 
-          || currentNotifications.some((notification) => notification.viewed === false)
+          (moreNotifications === true || currentNotifications.some((notification) => notification.viewed === false))
           && <p>You have unread notification(s)</p>
         }
         <ul>
