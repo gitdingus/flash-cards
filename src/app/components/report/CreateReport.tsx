@@ -1,9 +1,11 @@
+'use client';
+
 interface CreateReportProps {
   reporter: string,
   reportee: string,
   setId: string,
 }
-export default async function CreateReport({ reporter, reportee, setId } : CreateReportProps) {
+export default function CreateReport({ reporter, reportee, setId } : CreateReportProps) {
   return (
     <div>
       <button type="button">Report</button>
