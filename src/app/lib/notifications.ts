@@ -10,15 +10,11 @@ export interface GetNotificationsConfig {
   viewed?: boolean,
 }
 
-export async function getNotifications(userId: string, configOptions?: GetNotificationsConfig) {
+export async function getNotifications(configOptions?: GetNotificationsConfig) {
   const session = await auth();
 
   if (!session) {
     throw new Error('Unauthorized');
-  }
-
-  if (session.user.userId !== userId) {
-    throw new Error('Forbidden');
   }
 
   let limit = null;
@@ -39,7 +35,7 @@ export async function getNotifications(userId: string, configOptions?: GetNotifi
   const unreadNotificationsQuery = sql`
     SELECT *
     FROM notification
-    WHERE recipient = ${userId}
+    WHERE recipient = ${session.user.userId}
       AND viewed = false
     ORDER BY datecreated DESC
     LIMIT ${limit}
@@ -49,7 +45,7 @@ export async function getNotifications(userId: string, configOptions?: GetNotifi
   const allNotificationsQuery = sql`
     SELECT *
     FROM notification
-    WHERE recipient = ${userId}
+    WHERE recipient = ${session.user.userId}
     ORDER BY datecreated DESC
     LIMIT ${limit}
     OFFSET ${offset}

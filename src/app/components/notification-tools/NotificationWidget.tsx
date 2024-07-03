@@ -17,7 +17,7 @@ export default function NotificationWidget({ session }: NotificationWidgetConfig
   const router = useRouter();
 
   useEffect(() => {
-    getNotifications(session.user.userId, { limit: 5, viewed: false })
+    getNotifications({ limit: 5, viewed: false })
       .then((data) => {
         const { notifications, hasMore } = data;
         setCurrentNotifications(notifications);

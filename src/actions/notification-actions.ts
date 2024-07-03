@@ -20,7 +20,7 @@ export async function populateNotifications(options: PopulateNotificationsConfig
     offset: options.results * options.page,
   }
 
-  const notifications = await getNotifications(session.user.userId, notificationsConfig);
+  const notifications = await getNotifications(notificationsConfig);
 
   return notifications;
 }
