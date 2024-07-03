@@ -1,8 +1,9 @@
-import { auth } from '@/auth';
-import { redirect } from 'next/navigation';
-import { populateNotifications } from "@/actions/notification-actions";
+'use client';
+import { useEffect, useState } from 'react';
 import Notification from '@/app/components/notification-tools/Notification';
-import ResultsPerPageSelect from '@/app/user/notifications/ResultsPerPageSelect';
+import { getNotifications } from '@/app/lib/notifications';
+import { markNotificationAsRead } from '@/actions/notification-actions';
+import { get } from 'http';
 
 interface NotificationProps {
   searchParams: {
@@ -11,59 +12,77 @@ interface NotificationProps {
   }
 }
 
-export default async function Notifications(props: NotificationProps) {
-  const session = await auth();
+type NotificationType = 'all' | 'unread';
 
-  if (!session) {
-    return <div>Log in to view your notifications</div>
-  }
-  const DEFAULT_PAGE_NUM = 0;
-  const DEFAULT_RESULT_COUNT = 10;
-  let page = Number.parseInt(props.searchParams.page) || DEFAULT_PAGE_NUM;
-  let results = Number.parseInt(props.searchParams.results) || DEFAULT_RESULT_COUNT;
-  let { notifications, hasMore } = await populateNotifications({ page, results })
+export default function Notifications(props: NotificationProps) {
+  const [currentNotifications, setCurrentNotifications] = useState<NotificationBase[]>([]);
+  const [notificationType, setNotificationType] = useState<NotificationType>('unread');
+  const [moreNotifications, setMoreNotifications] = useState(false);
   
-  const buildSearchParams = async (targetPage: number, targetResults: number) => {
-    'use server';
-    const searchParams = new URLSearchParams();
-
-    if (targetPage !== 0) {
-      searchParams.set('page', targetPage.toString());
+  useEffect(() => {
+    const config = {
+      viewed: notificationType === 'unread' ? false : true,
+      limit: 10,
+      offset: 0,
     }
 
-    if (targetResults !== DEFAULT_RESULT_COUNT) {
-      searchParams.set('results', targetResults.toString());
-    }
+    getNotifications(config)
+      .then(async ({ notifications, hasMore }) => {
+        setCurrentNotifications(notifications);
+        setMoreNotifications(hasMore);
 
-    if (searchParams.toString() === '') {
-      return '';
-    }
-
-    return `?${searchParams.toString()}`
-  }
-
-  const changeResultsPerPage = async (targetResults: number) => {
-    'use server';
-    redirect(`/user/notifications${await buildSearchParams(page, targetResults)}`);
-  }
+        await markNotificationAsRead(notifications.map((notification) => notification.id));
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, [notificationType]);
   
+  function loadMoreNotifications() {
+    const config = {
+      viewed: notificationType === "unread" ? false : true,
+      limit: 10,
+      offset: notificationType === 'unread' ? 0 : currentNotifications.length,
+    }
+    getNotifications(config)
+      .then(async ({notifications, hasMore}) => {
+        const allNotifications = currentNotifications.concat(notifications);
+
+        setCurrentNotifications(allNotifications);
+        setMoreNotifications(hasMore);
+        
+        await markNotificationAsRead(notifications.map((notification) => notification.id));
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
   return (
     <div>
-      <ResultsPerPageSelect changeAction={changeResultsPerPage}/>
+      <fieldset>
+        <legend>View notifications</legend>
+        <label>
+          Unread
+          <input type="radio" name="type" value="unread" onClick={() => setNotificationType('unread')} defaultChecked />
+        </label>
+        <label>
+          All
+          <input type="radio" name="type" value="all" onClick={() => setNotificationType('all')}/>
+        </label>
+      </fieldset>
       {
-        notifications.map((notification) => {
-          return (
-            <Notification key={notification.id} notification={notification} />
-          )
-        })
+        (
+          currentNotifications.length &&
+          currentNotifications.map((notification) => {
+            return <Notification key={notification.id} notification={notification} />
+          })
+        ) ||
+        <p>You have no new notifications at this time</p>
       }
       {
-        page > 0 &&
-        <a href={`/user/notifications${await buildSearchParams(page - 1, results)}`}>Previous</a>
-      }
-      {
-        hasMore &&
-        <a href={`/user/notifications${await buildSearchParams(page + 1, results)}`}>Next</a>
+        moreNotifications &&
+        <button type="button" onClick={() => loadMoreNotifications()}>Load More Notifications</button>
       }
     </div>
   )
