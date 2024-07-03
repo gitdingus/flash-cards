@@ -4,7 +4,7 @@ import { getUserById } from '@/app/lib/accounts';
 import { auth } from '@/auth';
 import { hasAccessToSet } from '@/app/lib/permissions';
 import ExpandableCard from '@/app/components/ExpandableCard';
-
+import CreateReport from '@/app/components/report/CreateReport';
 export default async function SetInfo({ params }: { params: { id: string } }) {
   const [set, session] = await Promise.all([
     getSet(params.id),
@@ -31,6 +31,10 @@ export default async function SetInfo({ params }: { params: { id: string } }) {
       {
         owner &&
         <p>Created by: <span>{owner.username}</span></p>
+      }
+      {
+        session?.user &&
+        <CreateReport reporter={session.user.userId} reportee={set.owner} setId={set.id} />
       }
       {
         session?.user.userId === set.owner && 

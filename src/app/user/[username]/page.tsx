@@ -2,6 +2,8 @@ import { auth } from '@/auth';
 import { getUser } from "@/app/lib/accounts";
 import { getAllowedSetsFromUser } from "@/app/lib/data";
 import SetPermissions from '@/app/components/set-tools/SetPermissions';
+import CreateReport from '@/app/components/report/CreateReport';
+
 interface UserParams {
   params: {
     username: string,
@@ -37,6 +39,10 @@ export default async function User({ params : { username }}: UserParams) {
                     <SetPermissions 
                       set={set} 
                     />
+                  }
+                  {
+                    session?.user &&
+                    <CreateReport reporter={session.user.userId} reportee={user.id} setId={set.id} />
                   }
                 </div>
               </li>
