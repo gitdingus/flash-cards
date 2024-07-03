@@ -1,7 +1,7 @@
 'use server';
 import { auth } from  '@/auth';
 import { getNotifications, GetNotificationsConfig } from "@/app/lib/notifications";
-import { sql } from '@vercel/postgres';
+import { sql, db } from '@vercel/postgres';
 
 interface PopulateNotificationsConfig {
   page: number,
@@ -25,29 +25,36 @@ export async function populateNotifications(options: PopulateNotificationsConfig
   return notifications;
 }
 
-export async function markNotificationAsRead(notificationId: string) {
-  const [ session, notification ]  = await Promise.all([
-    auth(),
-    sql`
-      SELECT * FROM notification WHERE id = ${notificationId}
-    ;`,
-  ]);
+export async function markNotificationAsRead(notificationId: string | string[]) {
+  const session = await auth();
 
   if (!session) {
     throw new Error('Unauthorized');
   }
 
-  if (notification.rowCount === 0) {
-    throw new Error('Not found');
+  if (notificationId === '' || notificationId.length === 0) {
+    return;
   }
 
-  if (session.user.userId !== notification.rows[0].recipient) {
-    throw new Error('Forbidden');
+  if (!Array.isArray(notificationId)) {
+    notificationId = [notificationId];
   }
 
-  await sql`
-    UPDATE notification
-    SET viewed = true
-    WHERE id = ${notificationId}
-  ;`
+  const valuesStr = notificationId.map((val, index) => `$${index + 1}`).join(', ');
+  const selectQueryStr = `SELECT * FROM notification WHERE id IN (${valuesStr});`;
+  const updateQueryStr = `UPDATE notification SET viewed = true WHERE id IN (${valuesStr});`;
+
+  const client = await db.connect();
+
+  const selectQuery = await client.query(selectQueryStr, notificationId);
+
+  const allOwnedByLoggedInUser = selectQuery.rows.every((row) => row.recipient === session.user.userId);
+
+  if (!allOwnedByLoggedInUser) {
+    throw new Error('Can not complete request');
+  }
+
+  const updateQuery = await client.query(updateQueryStr, notificationId);
+  client.release();
+
 }
