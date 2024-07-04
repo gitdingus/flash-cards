@@ -1,9 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Notification from '@/app/components/notification-tools/Notification';
 import { getNotifications } from '@/app/lib/notifications';
 import { markNotificationAsRead } from '@/actions/notification-actions';
-import { get } from 'http';
+import { SessionContext } from '@/app/context/SessionContext';
 
 interface NotificationProps {
   searchParams: {
@@ -18,8 +18,13 @@ export default function Notifications(props: NotificationProps) {
   const [currentNotifications, setCurrentNotifications] = useState<NotificationBase[]>([]);
   const [notificationType, setNotificationType] = useState<NotificationType>('unread');
   const [moreNotifications, setMoreNotifications] = useState(false);
-  
+  const session = useContext(SessionContext);
+
   useEffect(() => {
+    if (!session) {
+      return;
+    }
+
     const config = {
       viewed: notificationType === 'unread' ? false : true,
       limit: 10,
@@ -36,7 +41,7 @@ export default function Notifications(props: NotificationProps) {
       .catch((err) => {
         console.log(err);
       });
-  }, [notificationType]);
+  }, [notificationType, session]);
   
   function loadMoreNotifications() {
     const config = {
@@ -58,6 +63,9 @@ export default function Notifications(props: NotificationProps) {
       });
   }
 
+  if (!session) {
+    return <p>Please login to view this page</p>
+  }
   return (
     <div>
       <fieldset>

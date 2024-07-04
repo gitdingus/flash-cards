@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Authentication from '@/app/components/Authentication';
 import NotificationWidget from '@/app/components/notification-tools/NotificationWidget';
 import { auth } from '@/auth';
-
+import AppSessionContext from './context/AppSessionContext';
 export const metadata = {
   title: {
     template: 'Flash Cards | %s',
@@ -46,7 +46,9 @@ export default async function RootLayout({
             }
           </div>
         </header>
-        {children}
+        <AppSessionContext session={session}>
+          {children}
+        </AppSessionContext>
       </body>
     </html>
   )

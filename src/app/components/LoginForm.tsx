@@ -1,9 +1,12 @@
+'use client';
+
 import { signIn } from '@/actions/auth-actions';
 import { useState } from 'react';
 
 export default function LoginForm({ children }: { children?: React.ReactNode }) {
   // const [ message, dispatch ] = useFormState(signIn, '');
   const [ formError, setFormError ] = useState('');
+
   return (
     <div>
       <p>Log in</p>
