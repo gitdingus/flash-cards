@@ -34,7 +34,7 @@ export default async function SetInfo({ params }: { params: { id: string } }) {
       }
       {
         session?.user &&
-        <CreateReport reporter={session.user.userId} reportee={set.owner} setId={set.id} />
+        <CreateReport setId={set.id} />
       }
       {
         session?.user.userId === set.owner && 

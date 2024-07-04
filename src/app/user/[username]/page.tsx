@@ -42,7 +42,7 @@ export default async function User({ params : { username }}: UserParams) {
                   }
                   {
                     session?.user &&
-                    <CreateReport reporter={session.user.userId} reportee={user.id} setId={set.id} />
+                    <CreateReport setId={set.id} />
                   }
                 </div>
               </li>
