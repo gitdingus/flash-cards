@@ -118,3 +118,45 @@ export async function getReports(configOptions?: GetReportsConfig) {
   const hasMore = reports.length < reportQueryResults.rowCount;
   return { reports, hasMore };
 }
+
+export async function getReport(id: string) {
+  const reportQuery = await sql`
+    SELECT 
+      report.*, 
+      set.name as set_name, 
+      reporter_info.username as reporter_name, 
+      reportee_info.username as reportee_name, 
+      moderator_info.username as moderator_name
+    FROM report
+    JOIN set ON set.id = report.setid 
+    JOIN users AS reporter_info ON report.reporter = reporter_info.id
+    JOIN users AS reportee_info ON report.reportee = reportee_info.id
+    LEFT JOIN users AS moderator_info ON report.moderatedby = moderator_info.id
+    WHERE report.id = ${id};
+  ;`;
+
+  console.log(reportQuery);
+  if (reportQuery.rowCount === 0) {
+    return null;
+  }
+  
+  const reportRow = reportQuery.rows[0];
+  const report: PopulatedResolvedReport = {
+    moderatorName: reportRow.moderator_name,
+    dateResolved: new Date(reportRow.dateresolved),
+    moderatedBy: reportRow.moderatedby,
+    actionTaken: reportRow.actiontaken,
+    id: reportRow.id,
+    reporter: reportRow.reporter,
+    reportee: reportRow.reportee,
+    setId: reportRow.setid,
+    reason: reportRow.reason,
+    dateCreated: new Date(reportRow.datecreated),
+    resolved: reportRow.resolved,
+    reporterName: reportRow.reporter_name,
+    reporteeName: reportRow.reportee_name,
+    setTitle: reportRow.set_name,
+  }
+
+  return report;
+}
