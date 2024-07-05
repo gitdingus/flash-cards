@@ -19,7 +19,6 @@ export default function SetPermissions({ set }: SetPermissionsParams) {
     if (permissionOption === "revoke") {
       getAllowedUsersOfSet(set.id)
         .then((users) => {
-          console.log(users);
           setAllowedUsers(users);
         })
         .catch((err) => {

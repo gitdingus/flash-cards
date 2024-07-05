@@ -245,7 +245,6 @@ async function getAllowedPrivateSets() {
       AND setpermission.granted = true;
   `;
 
-  console.log(setQuery);
   return setQuery.rows.map((row) => {
     const set: SetInfo = {
       owner: row.owner,

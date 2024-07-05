@@ -12,7 +12,6 @@ export async function getReports(configOptions?: GetReportsConfig) {
   let limit = 10;
   let offset = 0;
 
-  console.log(configOptions);
   if (configOptions?.limit) {
     limit = configOptions.limit + 1;
   }
@@ -135,7 +134,6 @@ export async function getReport(id: string) {
     WHERE report.id = ${id};
   ;`;
 
-  console.log(reportQuery);
   if (reportQuery.rowCount === 0) {
     return null;
   }

@@ -140,7 +140,6 @@ export async function saveNewCard(card: CardBase, set: SetInfo) {
     inSet: set.id,
   }
 
-  console.log(cardInSet);
   try {  
     await client.query('BEGIN');
 
@@ -154,7 +153,6 @@ export async function saveNewCard(card: CardBase, set: SetInfo) {
       ]
     );
 
-    console.log('inserted into card');
 
     const insertCardLinesBase = `INSERT INTO cardline (id, cardid, heading, content) VALUES`;
     const numPropertiesInLine = 4;
@@ -163,7 +161,6 @@ export async function saveNewCard(card: CardBase, set: SetInfo) {
 
     await client.query(insertCardLinesQuery, insertCardLinesValues);
 
-    console.log('inserted lines');
     await client.query('COMMIT');
   } catch (err) {
     await client.query('ROLLBACK');
@@ -237,13 +234,11 @@ export async function editCardTitle(card: CardInSet) {
 }
 
 export async function updateSetInformation(set: SetInfoBase) {
-  console.log(set);
   const [ setOwner, session ] = await Promise.all([
     sql`SELECT owner FROM set WHERE id = ${set.id};`,
     auth(),
   ]);
 
-  console.log(setOwner);
   if (!session) {
     throw new Error('Unauthorized');
   }
