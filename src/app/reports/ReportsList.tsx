@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { Report } from "@/types/report";
+import { PopulatedReport } from "@/types/report";
 import { getReports } from '@/app/lib/reports';
 import ReportRow from "@/app/reports/ReportRow";
 
 type ReportType = 'unresolved' | 'resolved' | 'all';
 
 export default function ReportsList() {
-  const [loadedReports, setLoadedReports] = useState<Report[]>([]);
+  const [loadedReports, setLoadedReports] = useState<PopulatedReport[]>([]);
   const [reportType, setReportType] = useState<ReportType>('unresolved');
   const [moreReports, setMoreReports] = useState(false);
   
