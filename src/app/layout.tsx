@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Authentication from '@/app/components/Authentication';
 import NotificationWidget from '@/app/components/notification-tools/NotificationWidget';
 import { auth } from '@/auth';
+import { isAdmin } from '@/app/lib/permissions';
 import AppSessionContext from './context/AppSessionContext';
 export const metadata = {
   title: {
@@ -17,6 +18,7 @@ export default async function RootLayout({
   children: React.ReactNode
 }) {
   const session = await auth();
+  const admin = await isAdmin();
 
   return (
     <html lang="en">
@@ -43,6 +45,12 @@ export default async function RootLayout({
             {
               session &&
               <NotificationWidget session={session} />
+            }
+          </div>
+          <div>
+            {
+              admin &&
+              <a href="/reports">Reports</a>
             }
           </div>
         </header>
