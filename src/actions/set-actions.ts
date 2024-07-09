@@ -1,11 +1,12 @@
 'use server';
-import { db, sql } from '@vercel/postgres';
+import { db, sql, VercelPoolClient } from '@vercel/postgres';
 import { getSetInfo } from '@/app/lib/data';
 import { getUser, getUserById } from '@/app/lib/accounts';
 import { auth } from '@/auth';
 import { v4 as uuid } from 'uuid';
 import { createNotification } from '@/utils/notification';
 import { headers } from 'next/headers';
+import { Session } from 'next-auth';
 
 function generateInsertQuery(base: string, numRows: number, numFields: number) {
   const valuesArr = [];
@@ -99,6 +100,7 @@ export async function getCardData(id: string) {
   
   const lines = cardData.rows.map((line) => {
     const newLine: LineRecord = { 
+      id: line.id,
       cardId: line.cardid,
       heading: line.heading,
       content: line.content,
@@ -110,19 +112,129 @@ export async function getCardData(id: string) {
   return lines;
 }
 
+async function getCardAndSetIdFromLine(session: Session ,client: VercelPoolClient, line: Line) {
+  const cardIdFromLine = await client.query("SELECT cardid FROM cardline WHERE id = $1", [line.id]);
+
+  if (cardIdFromLine.rowCount == 0) {
+    throw new Error(`Can not find line ${line.id}`);
+  }
+  
+  const cardId: string = cardIdFromLine.rows[0].cardid;
+  const setInfoFromCard = await client.query("SELECT inset FROM card WHERE id = $1", [cardId]);
+
+  if (setInfoFromCard.rowCount == 0) {
+    throw new Error(`Can not find card that line ${line.id} belongs to`);
+  }
+
+  const setId: string = setInfoFromCard.rows[0].inset;
+
+  const setInfo = await client.query("SELECT owner FROM set WHERE id = $1", [setId]);
+
+  if (setInfo.rowCount == 0) {
+    throw new Error(`Can not find set that card ${cardId} belongs to`);
+  }
+
+  if (setInfo.rows[0].owner !== session.user.userId) {
+    throw new Error('Forbidden');
+  }
+
+  return { setId, cardId }
+}
+
 export async function removeLine(line: Line) {
-  await sql`DELETE FROM cardline WHERE id = ${line.id};`;
+  const session = await auth();
+
+  if (!session) {
+    throw new Error('Unauthorized');
+  }
+
+  const client = await db.connect();
+  const { setId, cardId } = await getCardAndSetIdFromLine(session, client, line);
+  const now = new Date();
+
+  try {
+    await client.query("BEGIN");
+    const updates = Promise.all([
+      client.query("DELETE FROM cardline WHERE id = $1", [line.id]),
+      client.query("UPDATE card SET lastmodified = $1 WHERE id = $2", [now.toISOString(), cardId]),
+      client.query("UPDATE set SET lastmodified = $1 WHERE id = $2", [now.toISOString(), setId]),
+    ]);
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK");
+  } finally {
+    client.release();
+  }
 }
 
 export async function editLine(line: Line) {
-  await sql`UPDATE cardline SET heading = ${line.heading}, content = ${line.content} WHERE id = ${line.id};`;
+  const session = await auth();
+
+  if (!session) {
+    throw new Error('Unauthorized');
+  }
+
+  const client = await db.connect();
+  const { setId, cardId } = await getCardAndSetIdFromLine(session, client, line);
+  const now = new Date();
+
+  try {
+    await client.query("BEGIN");
+    const updates = Promise.all([
+      client.query('UPDATE cardline SET heading = $1, content = $2 WHERE id = $3', [line.heading, line.content, line.id]),
+      client.query("UPDATE card SET lastmodified = $1 WHERE id = $2", [now.toISOString(), cardId]),
+      client.query("UPDATE set SET lastmodified = $1 WHERE id = $2", [now.toISOString(), setId]),
+    ]);
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK");
+  } finally {
+    client.release();
+  }
 }
 
 export async function saveNewLine(line: Line, card: CardBase) {
-  await sql`
-    INSERT INTO cardline (id, cardid, heading, content)
-    VALUES (${line.id}, ${card.id}, ${line.heading}, ${line.content});
-  `;
+  const session = await auth();
+  
+  if (!session) {
+    throw new Error("Unauthorized");
+  }
+  
+  const client = await db.connect();
+
+  const cardInfo = await client.query('SELECT inset FROM card WHERE id = $1', [card.id]);
+  
+  if (cardInfo.rowCount == 0) {
+    throw new Error(`Can not find card ${card.id}`);
+  }
+
+  const setId = cardInfo.rows[0].inset;
+
+  const setInfo = await client.query('SELECT owner FROM set WHERE id = $1', [setId]);
+
+  if (setInfo.rowCount == 0) {
+    throw new Error(`Can not find set that card ${card.id} belongs to`);
+  }
+
+  if (setInfo.rows[0].owner != session.user.userId) {
+    throw new Error('Forbidden');
+  }
+
+  const now = new Date();
+
+  try {
+    await client.query("BEGIN");
+    const updates = Promise.all([
+      client.query('INSERT INTO cardline (id, cardid, heading, content) VALUES ($1, $2, $3, $4);', [line.id, card.id, line.heading, line.content]),
+      client.query("UPDATE card SET lastmodified = $1 WHERE id = $2", [now.toISOString(), card.id]),
+      client.query("UPDATE set SET lastmodified = $1 WHERE id = $2", [now.toISOString(), setId]),
+    ]);
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK");
+  } finally {
+    client.release();
+  }
 }
 
 export async function saveNewCard(card: CardBase, set: SetInfo) {
