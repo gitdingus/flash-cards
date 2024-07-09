@@ -353,7 +353,7 @@ export async function editCardTitle(card: CardInSet) {
     client.query("UPDATE card SET title = $1, lastmodified = $2 WHERE id = $3", [card.front.title, now, card.id]),
     client.query("UPDATE set SET lastmodified = $1 WHERE id = $2", [now, set.rows[0].id]),
   ]);
-  
+
 }
 
 export async function updateSetInformation(set: SetInfoBase) {
@@ -374,7 +374,8 @@ export async function updateSetInformation(set: SetInfoBase) {
     throw new Error('Forbidden');
   }
 
-  await sql`UPDATE set SET name = ${set.title}, description = ${set.description}, public = ${set.isPublic} WHERE id = ${set.id};`;
+  const now = new Date().toISOString();
+  await sql`UPDATE set SET name = ${set.title}, description = ${set.description}, public = ${set.isPublic}, lastmodified = ${now} WHERE id = ${set.id};`;
 
 }
 
