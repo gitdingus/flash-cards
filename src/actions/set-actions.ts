@@ -32,7 +32,7 @@ function generateInsertQuery(base: string, numRows: number, numFields: number) {
 function generateInsertCardsValuesArray(cards: CardInSet[]) {
   const values: string[] = [];
   cards.forEach((card) => {
-    values.push(card.id, card.inSet, card.dateCreated.toISOString(), card.front.title, card.dateCreated.toISOString());
+    values.push(card.id, card.inSet, card.dateCreated.toISOString(), card.front.title, card.lastModified.toISOString());
   });
 
   return values;
@@ -243,7 +243,13 @@ export async function saveNewCard(card: CardBase, set: SetInfo) {
     auth(),
   ]);
 
-  if (!session || session.user.userId !== set.owner) {
+  const setOwnerCheck = await client.query("SELECT owner FROM set WHERE id = $1",[set.id]);
+
+  if (setOwnerCheck.rowCount == 0) {
+    throw new Error(`Can not find set ${set.id} to insert card into`);
+  }
+
+  if (!session || session.user.userId !== setOwnerCheck.rows[0].owner) {
     throw new Error('Unauthorized');
   }
 
@@ -252,26 +258,29 @@ export async function saveNewCard(card: CardBase, set: SetInfo) {
     inSet: set.id,
   }
 
+  const insertCardLinesBase = `INSERT INTO cardline (id, cardid, heading, content) VALUES`;
+  const numPropertiesInLine = 4;
+  const insertCardLinesQuery = generateInsertQuery(insertCardLinesBase, cardInSet.back.lines.length, numPropertiesInLine);
+  const insertCardLinesValues = generateInsertLinesValuesArray(cardInSet);
+
   try {  
     await client.query('BEGIN');
 
-    await client.query(`
-      INSERT INTO card (id, inset, datecreated, title) VALUES ($1, $2, $3, $4);`,
-      [
-        cardInSet.id, 
-        cardInSet.inSet, 
-        cardInSet.dateCreated, 
-        cardInSet.front.title
-      ]
-    );
 
-
-    const insertCardLinesBase = `INSERT INTO cardline (id, cardid, heading, content) VALUES`;
-    const numPropertiesInLine = 4;
-    const insertCardLinesQuery = generateInsertQuery(insertCardLinesBase, cardInSet.back.lines.length, numPropertiesInLine);
-    const insertCardLinesValues = generateInsertLinesValuesArray(cardInSet);
-
-    await client.query(insertCardLinesQuery, insertCardLinesValues);
+    const changes = await Promise.all([
+      client.query(`
+        INSERT INTO card (id, inset, datecreated, title, lastmodified) VALUES ($1, $2, $3, $4, $5);`,
+        [
+          cardInSet.id, 
+          cardInSet.inSet, 
+          cardInSet.dateCreated.toISOString(), 
+          cardInSet.front.title,
+          cardInSet.lastModified.toISOString(),
+        ]
+      ),
+      client.query(insertCardLinesQuery, insertCardLinesValues),
+      client.query("UPDATE set SET lastmodified = $1 WHERE id = $2", [cardInSet.lastModified.toISOString(), set.id]),
+    ]);
 
     await client.query('COMMIT');
   } catch (err) {
@@ -301,19 +310,15 @@ export async function removeCard(card: CardInSet) {
   }
 
   const client = await db.connect();
-
+  const now = new Date();
   try {
     await client.query('BEGIN');
 
-    const linesQuery = await sql`SELECT * FROM cardline WHERE cardid = ${card.id};`;
-    
-    await Promise.all(
-      linesQuery.rows.map((line) => 
-        client.query(`DELETE FROM cardline WHERE id = $1`, [line.id])
-      ),
-    );
-
-    await client.query(`DELETE FROM card WHERE id = $1`, [card.id]);
+    const queries = await Promise.all([
+      client.query("DELETE FROM cardline WHERE id IN (SELECT id FROM cardline WHERE cardid = $1)", [card.id]),
+      client.query("DELETE FROM card WHERE id = $1", [card.id]),
+      client.query("UPDATE set SET lastmodified = $1 WHERE id = $2", [now.toISOString(), set.rows[0].id]),
+    ]);
 
     await client.query('COMMIT');
   } catch (err) {
@@ -325,7 +330,8 @@ export async function removeCard(card: CardInSet) {
 }
 
 export async function editCardTitle(card: CardInSet) {
-  const [ set, session ] = await Promise.all([
+  const [ client, set, session ] = await Promise.all([
+    db.connect(),
     sql`SELECT * FROM set WHERE id = ${card.inSet}`,
     auth(),
   ]);
@@ -342,7 +348,12 @@ export async function editCardTitle(card: CardInSet) {
     throw new Error('Forbidden');
   }
 
-  await sql`UPDATE card SET title = ${card.front.title} WHERE id = ${card.id}`;
+  const now = new Date().toISOString();
+  const queries = await Promise.all([
+    client.query("UPDATE card SET title = $1, lastmodified = $2 WHERE id = $3", [card.front.title, now, card.id]),
+    client.query("UPDATE set SET lastmodified = $1 WHERE id = $2", [now, set.rows[0].id]),
+  ]);
+  
 }
 
 export async function updateSetInformation(set: SetInfoBase) {
