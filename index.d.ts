@@ -40,9 +40,11 @@ interface CardRecord {
   inSet: string,
   dateCreated: Date,
   title: string,
+  lastModified: Date,
 }
 
 interface LineRecord {
+  id: string,
   cardId: string,
   heading: string,
   content: string, 
