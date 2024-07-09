@@ -16,11 +16,13 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
   const [ lines, setLines ] = useState<Line[]>(card?.back.lines || []);
 
   const save = () => {
+    const now = new Date();
     const newCard: CardBase = {
       id: card?.id || uuid(),
-      dateCreated: card?.dateCreated || new Date(),
+      dateCreated: card?.dateCreated || now,
       front: { title: cardTitle },
-      back: { lines }
+      back: { lines },
+      lastModified: card?.lastModified || now,
     }
 
     saveCard(newCard);

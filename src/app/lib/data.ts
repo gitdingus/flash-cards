@@ -34,6 +34,7 @@ export async function getSet(id: string) {
       dateCreated: cardResult.datecreated,
       front: { title: cardResult.title },
       back: { lines },
+      lastModified: cardResult.lastmodified,
     }
     
     return card;

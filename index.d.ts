@@ -17,6 +17,7 @@ interface CardBase {
   back: CardBack,
   id: string,
   dateCreated: Date,
+  lastModified: Date,
 }
 
 interface SetInfoBase {
