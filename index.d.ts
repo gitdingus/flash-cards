@@ -24,7 +24,8 @@ interface SetInfoBase {
   title: string,
   description: string,
   dateCreated: Date,
-  isPublic: boolean,  
+  isPublic: boolean, 
+  lastModified: Date,
 }
 
 interface SetInfo extends SetInfoBase {

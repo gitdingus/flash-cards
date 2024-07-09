@@ -23,12 +23,14 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
   const [ activeCard, setActiveCard ] = useState<CardBase | null>(null);
 
   const compileSetData = () => {
+    const now = new Date();
     const newSet: SetInfoBase = {
       id: set?.id || uuid(),
       title: setTitle,
       description: description,
-      dateCreated: set?.dateCreated || new Date(),
+      dateCreated: set?.dateCreated || now,
       isPublic,
+      lastModified: set?.lastModified || now,
     }
 
     const cardsInSet = cards.map((card) => {

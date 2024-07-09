@@ -23,6 +23,7 @@ export async function getSet(id: string) {
     dateCreated: setRecord.datecreated,
     owner: setRecord.owner,
     isPublic: setRecord.public,
+    lastModified: setRecord.lastmodified,
   }
 
   const cards: CardBase[] = await Promise.all(cardsQuery.rows.map(async (cardResult) => {
@@ -63,6 +64,7 @@ export async function getSetInfo(id: string) {
     description: setRecord.description,
     dateCreated: setRecord.datecreated,
     isPublic: setRecord.public,
+    lastModified: setRecord.lastmodified,
   }
 
   return set;
@@ -81,6 +83,7 @@ export async function getAllPublicSets() {
       description: set.description,
       isPublic: set.public,
       owner: set.owner,
+      lastModified: set.lastmodified,
     }
 
     return cardSet;
@@ -108,6 +111,7 @@ export async function getOwnSets() {
       description: set.description,
       owner: set.owner,
       isPublic: set.public,
+      lastModified: set.lastmodified,
     }
 
     return cardSet;
@@ -125,6 +129,7 @@ export async function getUsersPublicSets(userId: string) {
       description: setRecord.description,
       dateCreated: setRecord.datecreated,
       isPublic: setRecord.public,
+      lastModified: setRecord.lastmodified,
     }
 
     return set;
@@ -171,6 +176,7 @@ export async function getAllowedSetsFromUser(userId: string) {
       description: setRecord.description,
       dateCreated: setRecord.datecreated,
       isPublic: setRecord.public,
+      lastModified: setRecord.lastmodified,
     };
 
     return set;
@@ -253,6 +259,7 @@ async function getAllowedPrivateSets() {
       description: row.description,
       dateCreated: row.datecreated,
       isPublic: row.public,
+      lastModified: row.lastmodified,
     }
 
     return set;
