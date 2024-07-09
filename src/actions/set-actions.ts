@@ -31,7 +31,7 @@ function generateInsertQuery(base: string, numRows: number, numFields: number) {
 function generateInsertCardsValuesArray(cards: CardInSet[]) {
   const values: string[] = [];
   cards.forEach((card) => {
-    values.push(card.id, card.inSet, card.dateCreated.toISOString(), card.front.title);
+    values.push(card.id, card.inSet, card.dateCreated.toISOString(), card.front.title, card.dateCreated.toISOString());
   });
 
   return values;
@@ -61,15 +61,15 @@ export async function createSet({ newSet, cardsInSet }: { newSet: SetInfoBase, c
     await client.query('BEGIN');
     
     const insertSetCmd = `
-      INSERT INTO set (id, name, description, datecreated, owner, public)
-      VALUES ($1, $2, $3, $4, $5, $6);
+      INSERT INTO set (id, name, description, datecreated, owner, public, lastmodified)
+      VALUES ($1, $2, $3, $4, $5, $6, $7);
     `;
-    const setData = [newSet.id, newSet.title, newSet.description, newSet.dateCreated, session.user.userId, newSet.isPublic];
+    const setData = [newSet.id, newSet.title, newSet.description, newSet.dateCreated, session.user.userId, newSet.isPublic, newSet.dateCreated];
   
     await client.query(insertSetCmd, setData);
 
-    const insertCardsBase = `INSERT INTO card(id, inset, datecreated, title) VALUES`;
-    const numPropertiesInCard = 4;
+    const insertCardsBase = `INSERT INTO card(id, inset, datecreated, title, lastmodified) VALUES`;
+    const numPropertiesInCard = 5;
     const insertCardsQuery = generateInsertQuery(insertCardsBase, cardsInSet.length, numPropertiesInCard);
     const insertCardsValues = generateInsertCardsValuesArray(cardsInSet);
     
