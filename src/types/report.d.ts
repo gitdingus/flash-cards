@@ -26,3 +26,12 @@ interface PopulatedResolvedReport extends ResolvedReport, PopulatedReportBase {
 
 export type Report = ReportBase | ResolvedReport;
 export type PopulatedReport = PopulatedReportBase | PopulatedResolvedReport;
+
+interface ReportSummary {
+  setId: string,
+  setName: string,
+  setOwner: string,
+  reportCount: number,
+  resolved: boolean,
+  earliestReport: Date,
+}
