@@ -1,121 +1,86 @@
 'use server';
-import { PopulatedReport, PopulatedReportBase, PopulatedResolvedReport } from '@/types/report';
-import { sql } from '@vercel/postgres';
+import { ReportSummary, PopulatedResolvedReport } from '@/types/report';
+import { sql, db } from '@vercel/postgres';
 
-interface GetReportsConfig {
-  resolved?: boolean,
-  limit?: number,
-  offset?: number,
+interface OrderByOptions {
+  column: "earliest_report" | "report_count",
+  direction: "ASC" | "DESC",
 }
 
-export async function getReports(configOptions?: GetReportsConfig) {
-  let limit = 10;
-  let offset = 0;
+interface GetReportsConfig {
+  resolved?: boolean | 'all',
+  limit?: number,
+  offset?: number,
+  orderBy?: OrderByOptions,
+}
 
-  if (configOptions?.limit) {
-    limit = configOptions.limit + 1;
+interface CompleteGetReportsConfig {
+  resolved: boolean | 'all',
+  limit: number,
+  offset: number,
+  orderBy: OrderByOptions,
+}
+
+function mergeGetReportsConfig(configOptions: GetReportsConfig) {
+  const defaultConfig: CompleteGetReportsConfig = {
+    resolved: false,
+    limit: 10,
+    offset: 0,
+    orderBy: {
+      column: 'earliest_report',
+      direction: 'ASC',
+    }
   }
 
-  if (configOptions?.offset) {
-    offset = configOptions.offset;
-  }
+  return Object.assign({}, defaultConfig, configOptions);
+}
 
-  let reportQuery;
-
-  if (configOptions?.resolved === false) {
-    reportQuery = sql`
+export async function getReportSummaries(configOptions: GetReportsConfig) {
+  const config = mergeGetReportsConfig(configOptions);
+  const client = await db.connect();
+  let queryArgs = [config.resolved, config.limit + 1, config.offset];
+  let queryString = 
+  `
       SELECT 
-        report.*, 
-        set.name as set_name, 
-        reporter_info.username as reporter_name, 
-        reportee_info.username as reportee_name
+        report.setid, 
+        set.name, 
+        users.username,
+        users.id,
+        report.resolved,
+        COUNT(DISTINCT report.id) AS report_count,
+        MIN(report.datecreated AT TIME ZONE 'UTC') AS earliest_report
       FROM report
-      JOIN set ON set.id = report.setid 
-      JOIN users AS reporter_info ON report.reporter = reporter_info.id
-      JOIN users AS reportee_info ON report.reportee = reportee_info.id
-      WHERE resolved = false
-      LIMIT ${limit}
-      OFFSET ${offset}
-    ;`;
-  } else if (configOptions?.resolved === true) {
-    reportQuery = sql`
-      SELECT 
-        report.*, 
-        set.name as set_name, 
-        reporter_info.username as reporter_name, 
-        reportee_info.username as reportee_name, 
-        moderator_info.username as moderator_name
-      FROM report
-      JOIN set ON set.id = report.setid 
-      JOIN users AS reporter_info ON report.reporter = reporter_info.id
-      JOIN users AS reportee_info ON report.reportee = reportee_info.id
-      LEFT JOIN users AS moderator_info ON report.moderatedby = moderator_info.id
-      WHERE resolved = true
-      LIMIT ${limit}
-      OFFSET ${offset}
-    ;`;
-  } else {
-    reportQuery = sql`
-      SELECT 
-        report.*, 
-        set.name as set_name, 
-        reporter_info.username as reporter_name, 
-        reportee_info.username as reportee_name, 
-        moderator_info.username as moderator_name
-      FROM report
-      JOIN set ON set.id = report.setid 
-      JOIN users AS reporter_info ON report.reporter = reporter_info.id
-      JOIN users AS reportee_info ON report.reportee = reportee_info.id
-      LEFT JOIN users AS moderator_info ON report.moderatedby = moderator_info.id
-      LIMIT ${limit}
-      OFFSET ${offset} 
-    ;`;
-  }
+      JOIN set ON report.setid = set.id
+      JOIN users ON report.reportee = users.id
+  `
+    + `${config.resolved !== 'all' ? ' WHERE resolved = $1 ' : ''}`
+    + ` GROUP BY report.setid, set.name, users.username, users.id, report.resolved`
+    + ` ORDER BY ${config.orderBy.column === "earliest_report" ? "earliest_report" : "report_count"} ` + `${config.orderBy.direction === "ASC" ? "ASC" : "DESC"}`
+    + ` LIMIT $2`
+    + ` OFFSET $3`;
 
-  const reportQueryResults = await reportQuery;
-  const reports: PopulatedReport[] = reportQueryResults.rows
-    .filter((row, index) => index < limit - 1)
-    .map((reportRow) => {
-      let report;
-
-      const base = {
-        id: reportRow.id,
-        reporter: reportRow.reporter,
-        reportee: reportRow.reportee,
-        setId: reportRow.setid,
-        reason: reportRow.reason,
-        dateCreated: new Date(reportRow.datecreated),
+  const reportQueryResults = await client.query(queryString, queryArgs);
+  client.release();
+  
+  const summaries: ReportSummary[] = reportQueryResults.rows
+    .filter((row, index) => index < config.limit)
+    .map((row) => {
+      const reportSummary: ReportSummary = {
+        setId: row.setid,
+        setName: row.name,
+        setOwner: row.username,
+        reportCount: row.report_count,
+        earliestReport: new Date(row.earliest_report),
+        resolved: row.resolved,
       }
 
-      if (reportRow.resolved === false) {
-        const newReport: PopulatedReportBase = {
-          ...base,
-          resolved: false,
-          reporterName: reportRow.reporter_name,
-          reporteeName: reportRow.reportee_name,
-          setTitle: reportRow.set_name,
-        }
-        report = newReport;
-      } else {
-        const newReport: PopulatedResolvedReport = {
-          ...base,
-          dateResolved: new Date(reportRow.dateresolved),
-          moderatedBy: reportRow.moderatedby,
-          actionTaken: reportRow.actiontaken,
-          resolved: true,
-          moderatorName: reportRow.moderator_name,
-          reporterName: reportRow.reporter_name,
-          reporteeName: reportRow.reportee_name,
-          setTitle: reportRow.set_name,
-        }
-        report = newReport;
-      }
-
-      return report;
+      return reportSummary;
     });
 
-  const hasMore = reports.length < reportQueryResults.rowCount;
-  return { reports, hasMore };
+    return {
+      summaries,
+      hasMore: summaries.length < reportQueryResults.rowCount,
+    }
 }
 
 export async function getReport(id: string) {
