@@ -2,6 +2,7 @@
 import { sql, db } from '@vercel/postgres';
 import { getUserById } from '@/app/lib/accounts';
 import { auth } from '@/auth';
+import { isAdmin } from '@/app/lib/permissions';
 
 export async function getSet(id: string) {
   const client = await db.connect();
@@ -151,24 +152,32 @@ export async function getAllowedSetsFromUser(userId: string) {
     return getOwnSets();
   }
 
-  const allowedSetsQuery = await sql`
-    SELECT * 
-    FROM set 
-    WHERE owner = ${userId}
-      AND public = true
+  let allowedSetsQuery; 
+  if (await isAdmin()) {
+    allowedSetsQuery = await sql`
+      SELECT * FROM set WHERE owner = ${userId};
+    `;
+  } else {
+    allowedSetsQuery = await sql`
+      SELECT id, name, description, datecreated, owner, public 
+      FROM set 
+      WHERE owner = ${userId}
+        AND public = true
+  
+      UNION
+  
+      SELECT set.id, name, description, datecreated, owner, public
+      FROM set
+      JOIN setpermission
+        ON setpermission.setid = set.id
+      WHERE 
+        owner = ${userId}
+        AND setpermission.userid = ${session.user.userId}
+        AND setpermission.granted = true
+      ;
+    `;
+  }
 
-    UNION
-
-    SELECT set.id, name, description, datecreated, owner, public
-    FROM set
-    JOIN setpermission
-      ON setpermission.setid = set.id
-    WHERE 
-      owner = ${userId}
-      AND setpermission.userid = ${session.user.userId}
-      AND setpermission.granted = true
-    ;
-  `;
 
   const sets: SetInfoBase[] = allowedSetsQuery.rows.map((setRecord) => {
     const set: SetInfoBase = {
