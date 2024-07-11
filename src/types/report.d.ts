@@ -1,33 +1,37 @@
-interface ReportBase {
-  id: string, 
+export interface ReportBase {
+  reportId: string, 
   reporter: string,
   reportee: string,
   setId: string,
   reason: string,
   dateCreated: Date,
-  resolved: boolean,
+  resolved: false,
 } 
 
-interface ResolvedReport extends ReportBase {
-  dateResolved: Date,
-  moderatedBy: string,
-  actionTaken: string,
-}
-
-interface PopulatedReportBase extends ReportBase {
+export interface PopulatedReportBase extends ReportBase{
   reporterName: string,
   reporteeName: string,
-  setTitle: string,
+  setName: string,
 }
 
-interface PopulatedResolvedReport extends ResolvedReport, PopulatedReportBase {
+export interface ResolvedReport extends ReportBase {
+  resolutionId: string,
+  resolved: true,
+  dateResolved: Date,
+  moderatedId: string,
+  actionTaken: string,
+  explanation: string,
+  setLastModified: Date,
+}
+
+export interface PopulatedResolvedReport extends ResolvedReport, PopulatedReportBase {
   moderatorName: string,
 }
 
 export type Report = ReportBase | ResolvedReport;
 export type PopulatedReport = PopulatedReportBase | PopulatedResolvedReport;
 
-interface ReportSummary {
+export interface ReportSummary {
   setId: string,
   setName: string,
   setOwner: string,
