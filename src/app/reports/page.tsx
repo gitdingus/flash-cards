@@ -1,7 +1,7 @@
 import { auth } from '@/auth';
 import { sql } from '@vercel/postgres';
 import NotFound from '@/app/not-found'
-import ReportsList from '@/app/reports/ReportsList';
+import ReportSummariesList from '@/app/reports/ReportSummariesList';
 
 export default async function Reports() {
   const session = await auth();
@@ -22,6 +22,6 @@ export default async function Reports() {
   }
 
   return (
-    <ReportsList />
+    <ReportSummariesList />
   )
 }
