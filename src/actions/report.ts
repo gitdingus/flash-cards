@@ -51,25 +51,27 @@ export async function createReport(prevState: CreateReportState, formData: FormD
   }
 
   const newReport: ReportBase = {
-    id: uuid(),
+    reportId: uuid(),
     reporter: session.user.userId,
     reportee: set.owner,
     setId: set.id,
     reason: report,
     resolved: false,
     dateCreated: new Date(),
+    setLastModified: set.lastModified,
   }
 
   await sql`
-    INSERT INTO report (id, reporter, reportee, setid, reason, resolved, datecreated) 
+    INSERT INTO report (id, reporter, reportee, setid, reason, resolved, datecreated, set_last_modified) 
     VALUES (
-      ${newReport.id}, 
+      ${newReport.reportId}, 
       ${newReport.reporter}, 
       ${newReport.reportee}, 
       ${newReport.setId}, 
       ${newReport.reason}, 
       ${newReport.resolved},
-      ${newReport.dateCreated.toISOString()}
+      ${newReport.dateCreated.toISOString()},
+      ${newReport.setLastModified.toISOString()},
     )
   ;`;
 
