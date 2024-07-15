@@ -2,6 +2,7 @@
 import { ReportSummaryBase, PopulatedResolvedReport, FriendlyReportBase } from '@/types/report';
 import { PopulatedSetRecord } from '@/types/set';
 import { sql, db } from '@vercel/postgres';
+import { isAdmin as checkIsAdmin } from '@/app/lib/permissions';
 
 interface OrderByOptions {
   column: "earliest_report" | "report_count",
@@ -37,6 +38,12 @@ function mergeGetReportsConfig(configOptions: GetReportsSummariesConfig) {
 }
 
 export async function getReportSummaries(configOptions: GetReportsSummariesConfig) {
+  const isAdmin = await checkIsAdmin();
+
+  if (!isAdmin) {
+    throw new Error('Forbidden');
+  }
+
   const config = mergeGetReportsConfig(configOptions);
   const client = await db.connect();
   let queryArgs = [config.resolved, config.limit + 1, config.offset];
@@ -106,6 +113,12 @@ interface CompleteGetReportsConfig {
 
 
 export async function getReports(setId: string, reportsConfig: GetReportsConfig) {
+  const isAdmin = await checkIsAdmin();
+
+  if (!isAdmin){
+    throw new Error('Forbidden');
+  }
+  
   const completeConfig: CompleteGetReportsConfig = {
     limit: 10,
     offset: 0,
