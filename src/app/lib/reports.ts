@@ -1,5 +1,6 @@
 'use server';
 import { ReportSummaryBase, PopulatedResolvedReport, FriendlyReportBase } from '@/types/report';
+import { PopulatedSetRecord } from '@/types/set';
 import { sql, db } from '@vercel/postgres';
 
 interface OrderByOptions {
@@ -83,43 +84,111 @@ export async function getReportSummaries(configOptions: GetReportsSummariesConfi
     }
 }
 
-export async function getReport(id: string) {
-  const reportQuery = await sql`
+interface GetReportsConfig {
+  limit?: number,
+  offset?: number,
+  resolved?: boolean,
+  orderBy?: {
+    column: "report.datecreated",
+    direction: "ASC" | "DESC",
+  }
+}
+
+interface CompleteGetReportsConfig {
+  limit: number,
+  offset: number,
+  resolved: boolean,
+  orderBy: {
+    column: "report.datecreated",
+    direction: "ASC" | "DESC",
+  }
+}
+
+
+export async function getReports(setId: string, reportsConfig: GetReportsConfig) {
+  const completeConfig: CompleteGetReportsConfig = {
+    limit: 10,
+    offset: 0,
+    resolved: false,
+    orderBy: {
+      column: 'report.datecreated',
+      direction: 'ASC'
+    }
+  }
+
+  const config: CompleteGetReportsConfig = Object.assign({}, completeConfig, reportsConfig);
+  const client = await db.connect();
+
+  const queryArgs = [config.resolved, setId, config.limit + 1, config.offset];
+  const queryString = `
     SELECT 
-      report.*, 
-      set.name as set_name, 
-      reporter_info.username as reporter_name, 
-      reportee_info.username as reportee_name, 
-      moderator_info.username as moderator_name
-    FROM report
-    JOIN set ON set.id = report.setid 
-    JOIN users AS reporter_info ON report.reporter = reporter_info.id
-    JOIN users AS reportee_info ON report.reportee = reportee_info.id
-    LEFT JOIN users AS moderator_info ON report.moderatedby = moderator_info.id
-    WHERE report.id = ${id};
-  ;`;
+      report.id,
+      report.setid,
+      (report.datecreated AT TIME ZONE 'UTC') AS datecreated,
+      report.reason,
+      report.resolved,
+      (report.set_last_modified AT TIME ZONE 'UTC') AS set_last_modified,
+      set.name AS set_name,
+      reporter.username AS reporter_username,
+      reportee.username AS reportee_username
+    FROM report 
+    JOIN set ON set.id = report.setid
+    JOIN users AS reporter ON report.reporter = reporter.id
+    JOIN users AS reportee ON report.reportee = reportee.id 
+    WHERE report.resolved = $1 AND report.setid = $2 
+  ` 
+  + ` ORDER BY ` + config.orderBy.column + ' ' + config.orderBy.direction
+  + ` LIMIT $3 `
+  + ` OFFSET $4;`;
 
-  if (reportQuery.rowCount === 0) {
-    return null;
-  }
-  
-  const reportRow = reportQuery.rows[0];
-  const report: PopulatedResolvedReport = {
-    moderatorName: reportRow.moderator_name,
-    dateResolved: new Date(reportRow.dateresolved),
-    moderatedBy: reportRow.moderatedby,
-    actionTaken: reportRow.actiontaken,
-    id: reportRow.id,
-    reporter: reportRow.reporter,
-    reportee: reportRow.reportee,
-    setId: reportRow.setid,
-    reason: reportRow.reason,
-    dateCreated: new Date(reportRow.datecreated),
-    resolved: reportRow.resolved,
-    reporterName: reportRow.reporter_name,
-    reporteeName: reportRow.reportee_name,
-    setTitle: reportRow.set_name,
-  }
+  const [reportQuery, setQuery] = await Promise.all([
+    client.query(queryString, queryArgs),
+    sql`
+      SELECT 
+        set.id,
+        set.name,
+        set.description,
+        set.public,
+        set.hidden,
+        set.owner,
+        (set.datecreated AT TIME ZONE 'UTC') AS datecreated,
+        (set.lastmodified AT TIME ZONE 'UTC') AS lastmodified,
+        users.username AS owner_username
+      FROM set
+      JOIN users ON users.id = set.owner
+      WHERE set.id = ${setId};
+    `,
+  ]);
 
-  return report;
+  const reports: FriendlyReportBase[] = reportQuery.rows
+    .filter((row, index) => index < config.limit)
+    .map((row) => {
+      const report: FriendlyReportBase = {
+        reporterName: row.reporter_username,
+        reporteeName: row.reportee_username,
+        setName: row.set_name,
+        reportId: row.id,
+        setId: row.setid,
+        reason: row.reason,
+        dateCreated: new Date(row.datecreated),
+        resolved: row.resolved,
+        setLastModified: new Date(row.set_last_modified),
+      }
+
+      return report;
+    });
+
+    const setRow = setQuery.rows[0];
+    const setInfo: PopulatedSetRecord = {
+      ownerUsername: setRow.owner_username,
+      id: setRow.id,
+      name: setRow.name,
+      description: setRow.description,
+      ownerId: setRow.owner,
+      public: setRow.public,
+      hidden: setRow.hidden,
+      dateCreated: new Date(setRow.datecreated),
+      lastModified: new Date(setRow.lastmodified),
+    }
+  return { setInfo, reports, hasMore: reports.length < reportQuery.rowCount }
 }
