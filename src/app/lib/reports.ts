@@ -1,5 +1,5 @@
 'use server';
-import { ReportSummary, PopulatedResolvedReport } from '@/types/report';
+import { ReportSummaryBase, PopulatedResolvedReport, FriendlyReportBase } from '@/types/report';
 import { sql, db } from '@vercel/postgres';
 
 interface OrderByOptions {
@@ -7,22 +7,22 @@ interface OrderByOptions {
   direction: "ASC" | "DESC",
 }
 
-interface GetReportsConfig {
+interface GetReportsSummariesConfig {
   resolved?: boolean | 'all',
   limit?: number,
   offset?: number,
   orderBy?: OrderByOptions,
 }
 
-interface CompleteGetReportsConfig {
+interface CompleteGetReportsSummariesConfig {
   resolved: boolean | 'all',
   limit: number,
   offset: number,
   orderBy: OrderByOptions,
 }
 
-function mergeGetReportsConfig(configOptions: GetReportsConfig) {
-  const defaultConfig: CompleteGetReportsConfig = {
+function mergeGetReportsConfig(configOptions: GetReportsSummariesConfig) {
+  const defaultConfig: CompleteGetReportsSummariesConfig = {
     resolved: false,
     limit: 10,
     offset: 0,
@@ -35,7 +35,7 @@ function mergeGetReportsConfig(configOptions: GetReportsConfig) {
   return Object.assign({}, defaultConfig, configOptions);
 }
 
-export async function getReportSummaries(configOptions: GetReportsConfig) {
+export async function getReportSummaries(configOptions: GetReportsSummariesConfig) {
   const config = mergeGetReportsConfig(configOptions);
   const client = await db.connect();
   let queryArgs = [config.resolved, config.limit + 1, config.offset];
@@ -62,10 +62,10 @@ export async function getReportSummaries(configOptions: GetReportsConfig) {
   const reportQueryResults = await client.query(queryString, queryArgs);
   client.release();
   
-  const summaries: ReportSummary[] = reportQueryResults.rows
+  const summaries: ReportSummaryBase[] = reportQueryResults.rows
     .filter((row, index) => index < config.limit)
     .map((row) => {
-      const reportSummary: ReportSummary = {
+      const reportSummary: ReportSummaryBase = {
         setId: row.setid,
         setName: row.name,
         setOwner: row.username,
