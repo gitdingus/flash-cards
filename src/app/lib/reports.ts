@@ -46,7 +46,14 @@ export async function getReportSummaries(configOptions: GetReportsSummariesConfi
 
   const config = mergeGetReportsConfig(configOptions);
   const client = await db.connect();
-  let queryArgs = [config.resolved, config.limit + 1, config.offset];
+  let queryArgs; 
+
+  if (config.resolved === 'all') {
+    queryArgs = [config.limit + 1, config.offset];
+  } else {
+    queryArgs = [config.resolved, config.limit + 1, config.offset];
+  }
+
   let queryString = 
   `
       SELECT 
@@ -64,8 +71,8 @@ export async function getReportSummaries(configOptions: GetReportsSummariesConfi
     + `${config.resolved !== 'all' ? ' WHERE resolved = $1 ' : ''}`
     + ` GROUP BY report.setid, set.name, users.username, users.id, report.resolved`
     + ` ORDER BY ${config.orderBy.column === "earliest_report" ? "earliest_report" : "report_count"} ` + `${config.orderBy.direction === "ASC" ? "ASC" : "DESC"}`
-    + ` LIMIT $2`
-    + ` OFFSET $3`;
+    + ` LIMIT ${config.resolved === 'all' ? '$1' : '$2'}`
+    + ` OFFSET ${config.resolved === 'all' ? '$2' : '$3'}`;
 
   const reportQueryResults = await client.query(queryString, queryArgs);
   client.release();
@@ -85,10 +92,10 @@ export async function getReportSummaries(configOptions: GetReportsSummariesConfi
       return reportSummary;
     });
 
-    return {
-      summaries,
-      hasMore: summaries.length < reportQueryResults.rowCount,
-    }
+  return {
+    summaries,
+    hasMore: summaries.length < reportQueryResults.rowCount,
+  }
 }
 
 interface GetReportsConfig {
