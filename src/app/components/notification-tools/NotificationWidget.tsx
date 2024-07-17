@@ -68,7 +68,7 @@ export default function NotificationWidget({ session }: NotificationWidgetConfig
                   return false;
                 }}>
                   <div>
-                    <LinkMarkDownTransformer baseUrl={window.location.host} text={notification.content} />
+                    <LinkMarkDownTransformer baseUrl={window.location.origin} text={notification.content} />
                   </div>
                 </li>
               )

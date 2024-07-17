@@ -5,7 +5,7 @@ interface NotificationProps {
   notification: NotificationBase,
 } 
 export default function Notification({ notification }: NotificationProps) {
-  const host = window.location.host;
+  const host = window.location.origin;
 
   return (
     <div className={!notification.viewed ? 'unread' : ''}>
