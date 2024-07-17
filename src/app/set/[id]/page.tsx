@@ -6,10 +6,16 @@ import { hasAccessToSet } from '@/app/lib/permissions';
 import ExpandableCard from '@/app/components/ExpandableCard';
 import CreateReport from '@/app/components/report/CreateReport';
 export default async function SetInfo({ params }: { params: { id: string } }) {
-  const [set, session] = await Promise.all([
-    getSet(params.id),
-    auth(),
-  ])
+  let set;
+  let session;
+  try {  
+    [set, session] = await Promise.all([
+      getSet(params.id),
+      auth(),
+    ]);
+  } catch (err) {
+    return <p>There has been a problem with your request.</p>
+  }
 
   if (!set) {
     return <div>Not Found</div>
