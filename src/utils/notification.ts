@@ -4,7 +4,8 @@ interface NotificationConfig {
   type: NotificationType,
   recipient: PublicUser,
   subject?: string,
-  content?: string
+  content?: string,
+  date?: Date
 }
 
 function defaultNotificationSubject(type: NotificationType) {
@@ -22,7 +23,7 @@ function defaultNotificationSubject(type: NotificationType) {
   }
 }
 
-export function createNotification({ type, recipient, subject, content }: NotificationConfig) {
+export function createNotification({ type, recipient, subject, content, date }: NotificationConfig) {
   const notification: AppNotification = {
     id: uuid(),
     type: type,
@@ -30,7 +31,7 @@ export function createNotification({ type, recipient, subject, content }: Notifi
     content: content || '', 
     recipient: recipient,
     viewed: false,
-    dateCreated: new Date()
+    dateCreated: date || new Date()
   }
 
   return notification;
