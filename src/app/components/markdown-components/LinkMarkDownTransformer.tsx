@@ -20,9 +20,10 @@ export default function LinkMarkDownTransformer({ text, baseUrl }: LinkMarkDownT
   if (link.value === undefined) {
     return <p>{text}</p>
   }
-  while (link.done !== true && currIndex < text.length) {
-    if (link === null) {
+  while (link.done !== true || currIndex < text.length) {
+    if (link.value === undefined) {
       elements.push(<span key={uuid()}>{text.slice(currIndex)}</span>);
+      break;
     }
 
     let url = link.value[2].startsWith('http://') ? link.value[2] : 'http://' + link.value[2];
@@ -31,10 +32,10 @@ export default function LinkMarkDownTransformer({ text, baseUrl }: LinkMarkDownT
     elements.push(<span key={uuid()}>{text.slice(currIndex, link.value.index)}</span>);
     elements.push(<span key={uuid()}><a href={url}>{urlText}</a></span>);
     currIndex = link.value.index + markdown.length;
-    
+
     link = links.next();
   } 
-  
+
   return (
     <p>
       {
