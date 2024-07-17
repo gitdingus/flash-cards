@@ -418,7 +418,7 @@ export async function setVisibility(formData: FormData) {
       );
 
       const userField = formData.get('user') as string;
-      const baseUrl = headers().get('host');
+      const baseUrl = headers().get('origin');
       let user; 
   
       if (userField){
