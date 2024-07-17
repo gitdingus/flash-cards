@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { ReportSummary } from "@/types/report";
+import { ReportSummaryBase } from "@/types/report";
 import { getReportSummaries } from '@/app/lib/reports';
 import ReportSummaryRow from "@/app/reports/ReportSummaryRow";
 
 type ReportType = 'unresolved' | 'resolved' | 'all';
 
 export default function ReportsList() {
-  const [loadedSummaries, setLoadedSummaries] = useState<ReportSummary[]>([]);
+  const [loadedSummaries, setLoadedSummaries] = useState<ReportSummaryBase[]>([]);
   const [reportType, setReportType] = useState<ReportType>('unresolved');
   const [moreSummaries, setMoreSummaries] = useState(false);
   
@@ -16,8 +16,8 @@ export default function ReportsList() {
     const config = {
       limit: 2,
       offset: 0,
-      resolved: reportType === "all" ? undefined :
-        reportType === "unresolved" ? false : true,
+      resolved: reportType === "all" ? reportType :
+        (reportType === "unresolved" ? false : true),
     }
     getReportSummaries(config)
       .then(({ summaries, hasMore }) => {
@@ -30,8 +30,8 @@ export default function ReportsList() {
     const config = {
       limit: 2, 
       offset: loadedSummaries.length,
-      resolved: reportType === "all" ? undefined :
-        reportType === "unresolved" ? false : true,
+      resolved: reportType === "all" ? reportType :
+        (reportType === "unresolved" ? false : true),
     }
 
     getReportSummaries(config)
