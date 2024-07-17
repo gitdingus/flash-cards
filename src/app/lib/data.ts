@@ -8,9 +8,10 @@ import { SetRecord } from '@/types/set';
 export async function getSet(id: string) {
   const client = await db.connect();
 
-  const [ setQuery, cardsQuery ] = await Promise.all([
+  const [ setQuery, cardsQuery, session ] = await Promise.all([
     client.sql`SELECT * FROM set WHERE id = ${id};`,
-    client.sql`SELECT * FROM card WHERE inset = ${id};`
+    client.sql`SELECT * FROM card WHERE inset = ${id};`,
+    auth(),
   ]);
 
   if (setQuery.rows.length === 0) {
@@ -18,6 +19,14 @@ export async function getSet(id: string) {
   }
 
   const setRecord = setQuery.rows[0];
+
+  if (
+    setRecord.hidden === true 
+    && setRecord.owner !== session?.user.userId
+    && (await isAdmin()) === false) {
+    throw new Error('Set has been hidden');
+  }
+
   const set: SetInfo = {
     id: setRecord.id,
     title: setRecord.name,
@@ -76,7 +85,10 @@ export async function getSetInfo(id: string) {
 
 export async function getAllPublicSets() {
   const result = await sql`
-    SELECT * FROM set WHERE public = 'true';
+    SELECT * 
+    FROM set 
+    WHERE public = true
+      AND hidden = false;
   `; 
 
   const sets = result.rows.map((set) => {
@@ -125,7 +137,13 @@ export async function getOwnSets() {
 }
 
 export async function getUsersPublicSets(userId: string) {
-  const setQuery = await sql`SELECT * FROM set WHERE owner = ${userId} AND public = true;`;
+  const setQuery = await sql`
+    SELECT * 
+    FROM set 
+    WHERE owner = ${userId} 
+      AND public = true
+      AND hidden = false  
+    ;`;
   const sets: SetInfoBase[] = setQuery.rows.map((setRecord) => {
     const set: SetInfoBase = {
       id: setRecord.id,
@@ -165,6 +183,7 @@ export async function getAllowedSetsFromUser(userId: string) {
       FROM set 
       WHERE owner = ${userId}
         AND public = true
+        AND hidden = false
   
       UNION
   
@@ -174,6 +193,7 @@ export async function getAllowedSetsFromUser(userId: string) {
         ON setpermission.setid = set.id
       WHERE 
         owner = ${userId}
+        AND hidden = false
         AND setpermission.userid = ${session.user.userId}
         AND setpermission.granted = true
       ;
@@ -259,6 +279,7 @@ async function getAllowedPrivateSets() {
     JOIN set
       ON set.id = setpermission.setid
     WHERE set.public = false
+      AND set.hidden = false
       AND setpermission.userid = ${session.user.userId}
       AND setpermission.granted = true;
   `;
