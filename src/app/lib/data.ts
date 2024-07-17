@@ -3,6 +3,7 @@ import { sql, db } from '@vercel/postgres';
 import { getUserById } from '@/app/lib/accounts';
 import { auth } from '@/auth';
 import { isAdmin } from '@/app/lib/permissions';
+import { SetRecord } from '@/types/set';
 
 export async function getSet(id: string) {
   const client = await db.connect();
@@ -59,14 +60,15 @@ export async function getSetInfo(id: string) {
   }
 
   const setRecord = setQuery.rows[0];
-  const set: SetInfo = {
-    owner: setRecord.owner,
+  const set: SetRecord = {
+    ownerId: setRecord.owner,
     id: setRecord.id,
-    title: setRecord.name,
+    name: setRecord.name,
     description: setRecord.description,
     dateCreated: setRecord.datecreated,
-    isPublic: setRecord.public,
+    public: setRecord.public,
     lastModified: setRecord.lastmodified,
+    hidden: setRecord.hidden,
   }
 
   return set;
@@ -209,7 +211,7 @@ export async function getAllowedUsersOfSet(setId: string) {
     throw new Error('Not found');
   }
 
-  if (set.owner !== session.user.userId) {
+  if (set.ownerId !== session.user.userId) {
     throw new Error('Forbidden');
   }
 

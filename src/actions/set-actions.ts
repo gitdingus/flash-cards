@@ -399,11 +399,11 @@ export async function setVisibility(formData: FormData) {
     throw new Error('Unauthorized');
   }
 
-  if (session.user.userId !== set.owner) {
+  if (session.user.userId !== set.ownerId) {
     throw new Error('Forbidden');
   }
 
-  const setOwner = await getUserById(set.owner);
+  const setOwner = await getUserById(set.ownerId);
 
   if (formData.get('visibility') === 'public') {
     await sql`UPDATE set SET public = true WHERE id = ${set.id}`;
@@ -425,7 +425,7 @@ export async function setVisibility(formData: FormData) {
         switch (formData.get('permissions')) {
           case 'allow':
             user = await getUser(userField);
-            let acceptContentMarkdown = `You have been granted access to the set [${set.title}](${baseUrl}/set/${set.id}) by [${setOwner.username}](${baseUrl}/user/${setOwner.username})!`;
+            let acceptContentMarkdown = `You have been granted access to the set [${set.name}](${baseUrl}/set/${set.id}) by [${setOwner.username}](${baseUrl}/user/${setOwner.username})!`;
             const allowNotification = createNotification({
               type: 'set-permission-granted',
               recipient: user,
@@ -454,7 +454,7 @@ export async function setVisibility(formData: FormData) {
             break;
           case 'revoke':
             user = await getUserById(userField);
-            let rejectContentMarkdown = `Access to set [${set.title}](${baseUrl}/set/${set.id}) has been revoked by [${setOwner.username}](${baseUrl}/user/${setOwner.username}).`;
+            let rejectContentMarkdown = `Access to set [${set.name}](${baseUrl}/set/${set.id}) has been revoked by [${setOwner.username}](${baseUrl}/user/${setOwner.username}).`;
             const revokeNotification = createNotification({
               type: 'set-permission-revoked',
               recipient: user,

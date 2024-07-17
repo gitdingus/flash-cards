@@ -53,7 +53,7 @@ export async function createReport(prevState: CreateReportState, formData: FormD
   const newReport: ReportBase = {
     reportId: uuid(),
     reporter: session.user.userId,
-    reportee: set.owner,
+    reportee: set.ownerId,
     setId: set.id,
     reason: report,
     resolved: false,
