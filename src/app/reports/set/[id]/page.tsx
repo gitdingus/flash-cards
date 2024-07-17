@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { getReports } from '@/app/lib/reports';
 import { FriendlyReportBase } from '@/types/report';
 import { PopulatedSetRecord } from '@/types/set';
+import { takeModAction } from '@/actions/mod-actions';
 
 interface ReportSummaryProps {
   params: {
@@ -45,7 +46,20 @@ export default function ReportSummary({ params: { id }}: ReportSummaryProps) {
         <p>User: <a href={`/user/${topLevelInfo?.ownerUsername}`}>{topLevelInfo?.ownerUsername}</a></p>
       </div>
       <div>
-        Take action placeholder
+        <form action={takeModAction}>
+          <input type="hidden" name="set-id" value={id} />
+          <label>
+            Mod actions:
+            <select name="mod-action">
+              <option value="hide-content">Hide content</option>
+            </select>
+          </label>
+          <label>
+            Explanation:
+            <textarea name="explanation"></textarea>
+          </label>
+          <button type="submit">Submit</button>
+        </form>
       </div>
       <div>
         {
