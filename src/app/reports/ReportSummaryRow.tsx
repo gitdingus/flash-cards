@@ -1,7 +1,7 @@
-import { ReportSummary } from "@/types/report";
+import { ReportSummaryBase } from "@/types/report";
 
 interface ReportRowProps {
-  summary : ReportSummary,
+  summary : ReportSummaryBase,
 }
 export default function ReportRow({ summary }: ReportRowProps) {
 
@@ -12,7 +12,7 @@ export default function ReportRow({ summary }: ReportRowProps) {
       <td>{summary.reportCount}</td>
       <td>{summary.earliestReport.toLocaleString()}</td>
       <td><input type="checkbox" checked={summary.resolved} readOnly/></td>
-      <td><a href={`/reports/set/${summary.setId}`}>Go</a></td>
+      <td><a href={`/reports/set/${summary.setId}${summary.resolved ? '?resolved=true' : ''}`}>Go</a></td>
     </tr>
   )
 }
