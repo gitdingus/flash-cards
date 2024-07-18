@@ -3,7 +3,7 @@ import { sql, db } from '@vercel/postgres';
 import { getUserById } from '@/app/lib/accounts';
 import { auth } from '@/auth';
 import { isAdmin } from '@/app/lib/permissions';
-import { SetRecord } from '@/types/set';
+import { SetRecord, PopulatedSetRecord } from '@/types/set';
 
 export async function getSet(id: string) {
   const client = await db.connect();
@@ -62,14 +62,19 @@ export async function getSet(id: string) {
 }
 
 export async function getSetInfo(id: string) {
-  const setQuery = await sql`SELECT * FROM set WHERE id = ${id}`;
+  const setQuery = await sql`
+      SELECT set.*, users.username
+      FROM set
+      JOIN users ON users.id = set.owner
+      WHERE set.id = ${id}
+    ;`;
 
   if (setQuery.rowCount = 0) {
     return null;
   }
 
   const setRecord = setQuery.rows[0];
-  const set: SetRecord = {
+  let set: PopulatedSetRecord = {
     ownerId: setRecord.owner,
     id: setRecord.id,
     name: setRecord.name,
@@ -78,6 +83,7 @@ export async function getSetInfo(id: string) {
     public: setRecord.public,
     lastModified: setRecord.lastmodified,
     hidden: setRecord.hidden,
+    ownerUsername: setRecord.username,
   }
 
   return set;
