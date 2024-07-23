@@ -41,4 +41,19 @@ export interface ReportSummaryBase {
   reportCount: number,
   resolved: boolean,
   earliestReport: Date,
+  setLastModified: Date,
+}
+
+interface ReportActionBase {
+  id: string,
+  moderator: string,
+  dateResolved: Date,
+  actionTaken: string,
+  explanation: string, 
+  setId: string,
+  setLastModified: Date,
+}
+
+interface FriendlyReportAction extends ReportActionBase {
+  moderatorUsername: string,
 }
