@@ -1,5 +1,5 @@
 'use server';
-import { ReportSummaryBase, PopulatedResolvedReport, FriendlyReportBase } from '@/types/report';
+import { ReportSummaryBase, FriendlyReportAction, FriendlyReportBase } from '@/types/report';
 import { PopulatedSetRecord } from '@/types/set';
 import { sql, db } from '@vercel/postgres';
 import { isAdmin as checkIsAdmin } from '@/app/lib/permissions';
@@ -215,4 +215,36 @@ export async function getReports(setId: string, reportsConfig: GetReportsConfig)
       lastModified: new Date(setRow.lastmodified),
     }
   return { setInfo, reports, hasMore: reports.length < reportQuery.rowCount }
+}
+
+export async function getPastActions(setId: string) {
+  const isAdmin = await checkIsAdmin();
+
+  if (!isAdmin){
+    throw new Error('Forbidden');
+  }
+
+  const pastActionsQuery = await sql`
+    SELECT *, moderator.username AS moderator_username
+    FROM report_action
+    JOIN users AS moderator ON moderator.id = report_action.moderator
+    WHERE report_action.set_id = ${setId}
+  ;`;
+
+  const pastActions: FriendlyReportAction[] = pastActionsQuery.rows.map((row) => {
+    const pastAction: FriendlyReportAction = {
+      id: row.id,
+      moderator: row.moderator,
+      dateResolved: new Date(row.date_resolved),
+      actionTaken: row.action_taken,
+      explanation: row.explanation,
+      setId: row.set_id,
+      setLastModified: new Date(row.set_last_modified),
+      moderatorUsername: row.moderator_username,
+    }
+
+    return pastAction;
+  });
+  
+  return pastActions;
 }
