@@ -62,6 +62,7 @@ export async function getReportSummaries(configOptions: GetReportsSummariesConfi
         users.username,
         users.id,
         report.resolved,
+        report.set_last_modified,
         COUNT(DISTINCT report.id) AS report_count,
         MIN(report.datecreated AT TIME ZONE 'UTC') AS earliest_report
       FROM report
@@ -69,7 +70,7 @@ export async function getReportSummaries(configOptions: GetReportsSummariesConfi
       JOIN users ON report.reportee = users.id
   `
     + `${config.resolved !== 'all' ? ' WHERE resolved = $1 ' : ''}`
-    + ` GROUP BY report.setid, set.name, users.username, users.id, report.resolved`
+    + ` GROUP BY report.setid, set.name, users.username, users.id, report.resolved, report.set_last_modified`
     + ` ORDER BY ${config.orderBy.column === "earliest_report" ? "earliest_report" : "report_count"} ` + `${config.orderBy.direction === "ASC" ? "ASC" : "DESC"}`
     + ` LIMIT ${config.resolved === 'all' ? '$1' : '$2'}`
     + ` OFFSET ${config.resolved === 'all' ? '$2' : '$3'}`;
@@ -87,6 +88,7 @@ export async function getReportSummaries(configOptions: GetReportsSummariesConfi
         reportCount: row.report_count,
         earliestReport: new Date(row.earliest_report),
         resolved: row.resolved,
+        setLastModified: row.set_last_modified,
       }
 
       return reportSummary;
@@ -102,6 +104,7 @@ interface GetReportsConfig {
   limit?: number,
   offset?: number,
   resolved?: boolean,
+  lastModified?: Date,
   orderBy?: {
     column: "report.datecreated",
     direction: "ASC" | "DESC",
@@ -112,6 +115,7 @@ interface CompleteGetReportsConfig {
   limit: number,
   offset: number,
   resolved: boolean,
+  lastModified?: Date,
   orderBy: {
     column: "report.datecreated",
     direction: "ASC" | "DESC",
