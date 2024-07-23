@@ -42,7 +42,6 @@ async function hideSet(setId: string, modId: string, explanation: string) {
         [ uuid(), modId, now.toISOString(), 'hide-set', setId, set.lastmodified, explanation]
       ),
       client.query(
-        //id, recipient, type, subject, content, viewed, datecreated
         `INSERT INTO notification 
           (id, recipient, type, subject, content, viewed, datecreated)
          VALUES($1, $2, $3, $4, $5, $6, $7)`,
@@ -64,6 +63,98 @@ async function hideSet(setId: string, modId: string, explanation: string) {
   }  
 }
 
+async function unhideSet(setId: string, modId: string, explanation: string) {
+  const setQuery = await sql`
+    SELECT id, name, owner, lastmodified
+    FROM set
+    WHERE id = ${setId}
+  ;`;
+
+  if (setQuery.rowCount === 0) {
+    throw new Error('Not found');
+  }
+
+  const set = setQuery.rows[0];
+  const origin = headers().get('origin');
+  const notification = createNotification({
+    type: 'mod-action',
+    recipient: set.owner,
+    content: `Your set [${set.name}](${origin}/set/${set.id}) has been unhidden. In the future please try to follow site rules.`
+  });
+
+  const client = await db.connect();
+
+  await client.query('BEGIN');
+
+  try {
+    const now = new Date();
+
+    await Promise.all([
+      client.query('UPDATE set SET hidden = false WHERE id = $1;', [setId]),
+      client.query('UPDATE report SET resolved = true WHERE setid = $1', [setId]),
+      client.query(
+        `INSERT INTO report_action 
+          (id, moderator, date_resolved, action_taken, set_id, set_last_modified, explanation)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [ uuid(), modId, now.toISOString(), 'unhide-set', setId, set.lastmodified, explanation]
+      ),
+      client.query(
+        `INSERT INTO notification 
+          (id, recipient, type, subject, content, viewed, datecreated)
+        VALUES($1, $2, $3, $4, $5, $6, $7)`,
+        [ 
+          notification.id, notification.recipient, 
+          notification.type, notification.subject, 
+          notification.content, notification.viewed, 
+          notification.dateCreated.toISOString()
+        ]
+      ),
+    ]);
+
+    await client.query('COMMIT');
+  } catch (err) {
+    console.log(err);
+    await client.query('ROLLBACK');
+  } finally {
+    client.release();
+  }  
+}
+
+export async function closeWithNoAction(setId: string, modId: string, explanation: string) {
+  const setQuery = await sql`
+    SELECT id, name, owner, lastmodified
+    FROM set
+    WHERE id = ${setId}
+  ;`;
+
+  if (setQuery.rowCount === 0) {
+    throw new Error('Not found');
+  }
+
+  const set = setQuery.rows[0];
+  const now = new Date();
+  const client = await db.connect();
+  await client.query("BEGIN");
+
+  try {
+    await Promise.all([
+      client.query('UPDATE report SET resolved = true WHERE setid = $1', [setId]),
+      client.query(
+        `INSERT INTO report_action 
+          (id, moderator, date_resolved, action_taken, set_id, set_last_modified, explanation)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [ uuid(), modId, now.toISOString(), 'no-action', setId, set.lastmodified, explanation]
+      ),
+    ]);
+
+    await client.query("COMMIT");
+  } catch (err) {
+    console.log(err);
+    await client.query("ROLLBACK");
+  } finally {
+    client.release();
+  }
+}
 export async function takeModAction(formData: FormData) {
   const [ session, isAdmin ] = await Promise.all([
     auth(),
@@ -85,6 +176,12 @@ export async function takeModAction(formData: FormData) {
   switch (action) {
     case "hide-content":
       await hideSet(setId, session.user.userId, explanation);
+      break;
+    case "unhide-content":
+      await unhideSet(setId, session.user.userId, explanation);
+      break;
+    case "close-no-action":
+      await closeWithNoAction(setId, session.user.userId, explanation);
       break;
   }
 
