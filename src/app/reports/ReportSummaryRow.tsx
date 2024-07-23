@@ -4,7 +4,6 @@ interface ReportRowProps {
   summary : ReportSummaryBase,
 }
 export default function ReportRow({ summary }: ReportRowProps) {
-
   return (
     <tr>
       <td><a href={`/set/${summary.setId}`}>{summary.setName}</a></td>
@@ -12,7 +11,7 @@ export default function ReportRow({ summary }: ReportRowProps) {
       <td>{summary.reportCount}</td>
       <td>{summary.earliestReport.toLocaleString()}</td>
       <td><input type="checkbox" checked={summary.resolved} readOnly/></td>
-      <td><a href={`/reports/set/${summary.setId}${summary.resolved ? '?resolved=true' : ''}`}>Go</a></td>
+      <td><a href={`/reports/set/${summary.setId}${summary.resolved ? `?resolved=true&lastModified=${encodeURIComponent(summary.setLastModified.toISOString())}` : ''}`}>Go</a></td>
     </tr>
   )
 }
