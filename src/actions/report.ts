@@ -71,7 +71,7 @@ export async function createReport(prevState: CreateReportState, formData: FormD
       ${newReport.reason}, 
       ${newReport.resolved},
       ${newReport.dateCreated.toISOString()},
-      ${newReport.setLastModified.toISOString()},
+      ${newReport.setLastModified.toISOString()}
     )
   ;`;
 
