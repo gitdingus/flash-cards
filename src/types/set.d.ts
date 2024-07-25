@@ -7,6 +7,7 @@ export interface SetRecord {
   hidden: boolean
   dateCreated: Date,
   lastModified: Date,
+  removed: boolean,
 }
 
 export interface PopulatedSetRecord extends SetRecord {

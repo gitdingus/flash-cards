@@ -15,6 +15,7 @@ export default function ModActionsForm({ id }: ModActionsFormProps) {
             <option value="hide-content">Hide content</option>
             <option value="unhide-content">Unhide content</option>
             <option value="close-no-action">Close - No action</option>
+            <option value="remove-content">Remove Content - PERMANENT ACTION</option>
           </select>
         </label>
         <label>

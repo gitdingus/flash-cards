@@ -27,6 +27,12 @@ export async function getSet(id: string) {
     throw new Error('Set has been hidden');
   }
 
+  if (
+    setRecord.removed === true
+    && (await isAdmin() === false)) {
+    throw new Error('Set has been removed');
+  }
+
   const set: SetInfo = {
     id: setRecord.id,
     title: setRecord.name,
@@ -84,6 +90,7 @@ export async function getSetInfo(id: string) {
     lastModified: setRecord.lastmodified,
     hidden: setRecord.hidden,
     ownerUsername: setRecord.username,
+    removed: setRecord.removed,
   }
 
   return set;
@@ -94,7 +101,8 @@ export async function getAllPublicSets() {
     SELECT * 
     FROM set 
     WHERE public = true
-      AND hidden = false;
+      AND hidden = false
+      AND removed = false;
   `; 
 
   const sets = result.rows.map((set) => {
@@ -122,7 +130,7 @@ export async function getOwnSets() {
   }
 
   const result = await sql`
-    SELECT * FROM set WHERE owner = ${session?.user.userId}; 
+    SELECT * FROM set WHERE owner = ${session?.user.userId} AND removed = false; 
   `;
 
   const sets = result.rows.map((set) => {
@@ -148,7 +156,8 @@ export async function getUsersPublicSets(userId: string) {
     FROM set 
     WHERE owner = ${userId} 
       AND public = true
-      AND hidden = false  
+      AND hidden = false
+      AND removed = false 
     ;`;
   const sets: SetInfoBase[] = setQuery.rows.map((setRecord) => {
     const set: SetInfoBase = {
@@ -190,6 +199,7 @@ export async function getAllowedSetsFromUser(userId: string) {
       WHERE owner = ${userId}
         AND public = true
         AND hidden = false
+        AND removed = false
   
       UNION
   
@@ -200,6 +210,7 @@ export async function getAllowedSetsFromUser(userId: string) {
       WHERE 
         owner = ${userId}
         AND hidden = false
+        AND removed = false
         AND setpermission.userid = ${session.user.userId}
         AND setpermission.granted = true
       ;
@@ -286,6 +297,7 @@ async function getAllowedPrivateSets() {
       ON set.id = setpermission.setid
     WHERE set.public = false
       AND set.hidden = false
+      AND set.removed = false
       AND setpermission.userid = ${session.user.userId}
       AND setpermission.granted = true;
   `;
