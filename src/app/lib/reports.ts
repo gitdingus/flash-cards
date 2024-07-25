@@ -174,6 +174,7 @@ export async function getReports(setId: string, reportsConfig: GetReportsConfig)
         set.description,
         set.public,
         set.hidden,
+        set.removed,
         set.owner,
         (set.datecreated AT TIME ZONE 'UTC') AS datecreated,
         (set.lastmodified AT TIME ZONE 'UTC') AS lastmodified,
@@ -213,6 +214,7 @@ export async function getReports(setId: string, reportsConfig: GetReportsConfig)
       hidden: setRow.hidden,
       dateCreated: new Date(setRow.datecreated),
       lastModified: new Date(setRow.lastmodified),
+      removed: setRow.removed,
     }
   return { setInfo, reports, hasMore: reports.length < reportQuery.rowCount }
 }
