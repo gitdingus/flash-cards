@@ -7,6 +7,7 @@ import { v4 as uuid } from 'uuid';
 import { createNotification } from '@/utils/notification';
 import { headers } from 'next/headers';
 import { Session } from 'next-auth';
+import { isSuspended } from '@/app/lib/permissions';
 
 function generateInsertQuery(base: string, numRows: number, numFields: number) {
   const valuesArr = [];
@@ -56,6 +57,10 @@ export async function createSet({ newSet, cardsInSet }: { newSet: SetInfoBase, c
 
   if (!session) {
     throw new Error('Unauthorized');
+  }
+
+  if (await isSuspended()) {
+    throw new Error('Can not create new sets while account is suspended');
   }
 
   try {
@@ -148,6 +153,10 @@ export async function removeLine(line: Line) {
     throw new Error('Unauthorized');
   }
 
+  if (await isSuspended()) {
+    throw new Error('Can not edit sets while account is suspended');
+  }
+
   const client = await db.connect();
   const { setId, cardId } = await getCardAndSetIdFromLine(session, client, line);
   const now = new Date();
@@ -174,6 +183,10 @@ export async function editLine(line: Line) {
     throw new Error('Unauthorized');
   }
 
+  if (await isSuspended()) {
+    throw new Error('Can not edit sets while account is suspended');
+  }
+
   const client = await db.connect();
   const { setId, cardId } = await getCardAndSetIdFromLine(session, client, line);
   const now = new Date();
@@ -198,6 +211,10 @@ export async function saveNewLine(line: Line, card: CardBase) {
   
   if (!session) {
     throw new Error("Unauthorized");
+  }
+
+  if (await isSuspended()) {
+    throw new Error('Can not edit sets while account is suspended');
   }
   
   const client = await db.connect();
@@ -253,6 +270,10 @@ export async function saveNewCard(card: CardBase, set: SetInfo) {
     throw new Error('Unauthorized');
   }
 
+  if (await isSuspended()) {
+    throw new Error('Can not edit sets while account is suspended');
+  }
+
   const cardInSet: CardInSet = {
     ...card,
     inSet: set.id,
@@ -301,6 +322,10 @@ export async function removeCard(card: CardInSet) {
     throw new Error('Unauthorized');
   }
 
+  if (await isSuspended()) {
+    throw new Error('Can not edit sets while account is suspended');
+  }
+
   if (set.rows.length != 1) {
     throw new Error('Not found');
   }
@@ -340,6 +365,10 @@ export async function editCardTitle(card: CardInSet) {
     throw new Error('Unauthorized');
   }
 
+  if (await isSuspended()) {
+    throw new Error('Can not edit sets while account is suspended');
+  }
+
   if (set.rows.length != 1) {
     throw new Error('Not found');
   }
@@ -364,6 +393,10 @@ export async function updateSetInformation(set: SetInfoBase) {
 
   if (!session) {
     throw new Error('Unauthorized');
+  }
+
+  if (await isSuspended()) {
+    throw new Error('Can not edit sets while account is suspended');
   }
 
   if (setOwner.rows.length !== 1) {
@@ -397,6 +430,10 @@ export async function setVisibility(formData: FormData) {
 
   if (!session) {
     throw new Error('Unauthorized');
+  }
+
+  if (await isSuspended()) {
+    throw new Error('Can not edit sets while account is suspended');
   }
 
   if (session.user.userId !== set.ownerId) {
