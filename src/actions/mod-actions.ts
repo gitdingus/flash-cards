@@ -213,6 +213,93 @@ async function removeContent(setId: string, modId: string, explanation: string) 
 
 }
 
+async function suspendSetOwner(setId: string, modId: string, explanation: string, duration: string) {
+  const setQuery = await sql`SELECT id, name, owner, lastmodified FROM set WHERE id = ${setId};`
+
+  if (setQuery.rowCount === 0) {
+    throw new Error('Set not found');
+  }
+
+  if (!duration) {
+    throw new Error('Duration is unspecified');
+  }
+
+  const set = setQuery.rows[0];
+  let indefiniteSuspension = duration === 'permanent' ? true : false;
+  let durationInterval: number | null;
+  let origin = headers().get('origin');
+  let notificationString: string;
+
+  switch (duration) {
+    case "three-days":
+      durationInterval = 1000 * 60 * 60 * 24 * 3;
+      break;
+    case "one-week":
+      durationInterval = 1000 * 60 * 60 * 24 * 7;
+      break;
+    case "one-month":
+      durationInterval = 1000 * 60 * 60 * 24 * 30;
+      break;
+    default:
+      durationInterval = null;
+      break;
+  }
+
+  if (indefiniteSuspension) {
+    notificationString = `Your account has been indefinitely suspended for content posted to set [${set.name}](${origin}/set/${set.id}), the offending content has been removed.`
+  } else {
+    notificationString = `Your account has been suspended for ${duration.replace("-", " ")} for content posted to set [${set.name}](${origin}/set/${set.id}), the offending content has been removed.`
+  }
+
+  const timestamp = Date.now();
+  const now = new Date(timestamp);
+  const client = await db.connect();
+  const userId = set.owner;
+  const suspendedUntil = durationInterval ? new Date(timestamp + durationInterval).toISOString() : null;
+  const notification = createNotification({
+    type: 'mod-action',
+    content: notificationString,
+    recipient: set.owner,
+    date: now,
+  });
+
+  try {
+    await client.query("BEGIN");
+
+    await Promise.all([
+      client.query(`
+          INSERT INTO suspended_user (id, user_id, forever, active_until)
+          VALUES ($1, $2, $3, $4);`, 
+          [uuid(), userId, indefiniteSuspension, suspendedUntil]),
+      client.query(`
+          INSERT INTO notification (id, recipient, type, subject, content, viewed, datecreated)
+          VALUES ($1, $2, $3, $4, $5, $6, $7);`,
+          [
+            notification.id, notification.recipient,
+            notification.type, notification.subject,
+            notification.content, notification.viewed,
+            notification.dateCreated.toISOString()
+          ]),
+      client.query('UPDATE set SET removed = true WHERE id = $1;', [setId]),  
+      client.query('UPDATE report SET resolved = true WHERE setid = $1;', [setId]),   
+      client.query(`INSERT INTO report_action 
+        (id, moderator, date_resolved, action_taken, explanation, set_id, set_last_modified)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [uuid(), modId, now.toISOString(), 'remove-content', explanation, setId, set.lastmodified]), 
+      client.query(`INSERT INTO report_action 
+        (id, moderator, date_resolved, action_taken, explanation, set_id, set_last_modified)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [uuid(), modId, now.toISOString(), 'suspend-user', explanation, setId, set.lastmodified]), 
+    ]);
+
+    await client.query("COMMIT");
+  } catch (err) {
+    console.log(err);
+    await client.query("ROLLBACK");
+  } finally {
+    client.release();
+  }
+}
 export async function takeModAction(formData: FormData) {
   const [ session, isAdmin ] = await Promise.all([
     auth(),
@@ -230,6 +317,7 @@ export async function takeModAction(formData: FormData) {
   const setId = formData.get('set-id') as string;
   const action = formData.get('mod-action') as string;
   const explanation = formData.get('explanation') as string;
+  const duration = formData.get('duration') as string;
 
   switch (action) {
     case "hide-content":
@@ -243,6 +331,9 @@ export async function takeModAction(formData: FormData) {
       break;
     case "remove-content":
       await removeContent(setId, session.user.userId, explanation);
+      break;
+    case "suspend-user":
+      await suspendSetOwner(setId, session.user.userId, explanation, duration);
       break;
   }
 
