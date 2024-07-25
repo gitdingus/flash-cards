@@ -225,7 +225,7 @@ export async function getPastActions(setId: string) {
   }
 
   const pastActionsQuery = await sql`
-    SELECT *, moderator.username AS moderator_username
+    SELECT report_action.*, moderator.username AS moderator_username
     FROM report_action
     JOIN users AS moderator ON moderator.id = report_action.moderator
     WHERE report_action.set_id = ${setId}
