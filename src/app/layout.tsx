@@ -29,12 +29,12 @@ export default async function RootLayout({
               <li>
                 <Link href="/">Home</Link>
               </li>
-              <li>
-                <Link href="/cards/create">Create Card</Link>
-              </li>
-              <li>
-                <Link href="/cards/create-set">Create Set</Link>
-              </li>
+              {
+                session?.user && 
+                <li>
+                  <Link href="/cards/create-set">Create Set</Link>
+                </li>
+              }
               <li>
                 <a href="/cards">View Cards</a>
               </li>
