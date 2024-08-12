@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import Authentication from '@/app/components/Authentication';
+import Authentication from '@/app/components/authentication/Authentication';
 import NotificationWidget from '@/app/components/notification-tools/NotificationWidget';
 import { auth } from '@/auth';
 import { isAdmin } from '@/app/lib/permissions';
