@@ -1,0 +1,19 @@
+.expandableCard {
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 1px 1px 2px black;
+}
+
+.expandableCard button {
+  background-color: transparent;
+  border: 0;
+  font-size: 1.5rem;
+}
+
+.expandableCard div {
+  display: none;
+}
+
+.expandableCard div.active {
+  display: block;
+}

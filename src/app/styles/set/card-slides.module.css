@@ -1,0 +1,30 @@
+.cardSlides {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  grid-template-columns: auto 1fr auto;
+}
+
+.cardSlides button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: transparent;
+  border: 0;
+}
+
+.cardSlides button:hover {
+  transform: scale(1.15);
+}
+
+.cardSlides .buttonBar {
+  grid-column: 1 / 4;
+  display: flex;
+  justify-content: center;
+}
+
+.cardStyles .cardArea div{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
