@@ -13,6 +13,10 @@ type ActiveSide = "front" | "back";
 export default function ExpandableCard({ card, hideTitleOnFlip = false, children }: Props) {
   const [activeSide, setActiveSide] = useState<ActiveSide>("front");
 
+  useEffect(() => {
+    setActiveSide('front');
+  }, [card])
+  
   const click = () => {
     if (activeSide === 'front') {
       setActiveSide('back');
