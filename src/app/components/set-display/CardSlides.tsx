@@ -53,7 +53,7 @@ export default function CardSlides({ cards: initialCards }: CardSlidesProps) {
         <button type="button" onClick={prevCard}><Image alt='previous card' src={prevImg} width={30} height={30} /></button>
       </div>
       <div className={styles.cardArea}>
-          <ExpandableCard card={cards[activeCardIndex]} hideTitleOnFlip={true} />
+        <ExpandableCard card={cards[activeCardIndex]} hideTitleOnFlip={true} />
       </div>
       <div>
         <button type="button" onClick={nextCard}><Image alt='next card' src={nextImg} width={30} height={30}/></button>
