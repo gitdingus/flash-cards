@@ -3,7 +3,7 @@ import { getSet } from '@/app/lib/data';
 import { getUserById } from '@/app/lib/accounts';
 import { auth } from '@/auth';
 import { hasAccessToSet } from '@/app/lib/permissions';
-import ExpandableCard from '@/app/components/ExpandableCard';
+import CardGallery from '@/app/components/set-display/CardGallery';
 import CreateReport from '@/app/components/report/CreateReport';
 export default async function SetInfo({ params }: { params: { id: string } }) {
   let set;
@@ -31,12 +31,11 @@ export default async function SetInfo({ params }: { params: { id: string } }) {
 
   return (
     <div>
-      <h1>Set</h1>
-      <p>{set.title}</p>
+      <h1>{set.title}</h1>
       <p>{set.description}</p>
       {
         owner &&
-        <p>Created by: <span>{owner.username}</span></p>
+        <p>Created by: <span><a href={`/user/${owner.username}`}>{owner.username}</a></span></p>
       }
       {
         session?.user &&
@@ -46,17 +45,7 @@ export default async function SetInfo({ params }: { params: { id: string } }) {
         session?.user.userId === set.owner && 
         <a href={`/set/${set.id}/edit`}>Edit Set</a>
       }
-      <ul>
-        {
-          set.cards.map((card) => {
-            return(
-              <li key={card.id}>
-                <ExpandableCard card={card} />
-              </li>
-            )
-          })
-        }
-      </ul>
+      <CardGallery cards={set.cards} />
     </div>
   )
 }

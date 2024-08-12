@@ -1,0 +1,21 @@
+.cardGallery {
+  --background-color-primary: aquamarine;
+}
+
+.galleryOptions button {
+  background-color: transparent;
+  border: 0;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  font-size: 1.25rem;
+  padding: 1rem 2rem;
+}
+
+.galleryOptions button.active {
+  background-color: var(--background-color-primary);
+}
+
+.galleryDisplay {
+  padding: 1rem;
+  background-color: var(--background-color-primary);
+}
