@@ -1,0 +1,21 @@
+.memoryGame {
+  cursor: pointer;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, 150px);
+  padding: 20px;
+}
+
+.lineHeading {
+  font-weight: bold;
+}
+
+.front {
+  font-size: 1.1rem;
+}
+
+.back ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}

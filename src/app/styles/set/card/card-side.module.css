@@ -1,0 +1,21 @@
+.side {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #eeeeee;
+  border-radius: 10px;
+
+  width: 150px;
+  height: 150px;
+}
+
+.side:hover {
+  background-color: #dddddd;
+}
+.side.selected {
+  background-color: aquamarine;
+}
+
+.side.matched {
+  background-color: lightblue;
+}
