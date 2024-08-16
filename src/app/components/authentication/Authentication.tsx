@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import CreateAccountForm from './CreateAccountForm';
 import LoginForm from './LoginForm';
-import { signOut } from 'next-auth/react';
+import UserSession from './UserSession';
 import { Session } from 'next-auth';
 
 interface User {
@@ -48,11 +48,7 @@ export default function Authentication({ session }: { session: Session | null })
       )
     case "loggedin":
       return (
-        <div>
-          <p>Logged in as <a href={`/user/${session?.user.username}`}>{session?.user.username}</a></p>
-          <p><a href='/user/settings/'>Settings</a></p>
-          <button onClick={async () => { await signOut() }}>Logout</button>
-        </div>
+        <UserSession session={session} />
       )
   }
 }

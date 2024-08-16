@@ -1,0 +1,47 @@
+.userSession>div:first-child {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+
+}
+
+.optionsMenuContainer {
+  position: relative;
+}
+
+.optionsMenu {
+  display: none;
+  position: absolute;
+  background-color: white;
+  box-shadow: 1px 1px 2px black;
+
+  padding: 1rem 2rem;
+}
+
+.optionsMenu.expanded {
+  display: block;
+}
+
+.optionsMenu h1 {
+  font-size: 1rem;
+}
+
+.optionsMenu a,
+.optionsMenu button {
+  border: 0;
+  text-decoration: none;
+  background-color: white;
+
+  font-size: 1rem;
+  font-family: sans-serif;
+  color: black;
+
+  cursor: pointer;
+}
+
+.optionsMenu a:hover,
+.optionsMenu button:hover {
+  display: inline-block;
+  transform: scale(1.1);
+  color: pink;
+}
