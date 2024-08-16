@@ -13,7 +13,7 @@ interface UserSessionProps {
   session: Session | null,
 }
 
-export default function UserSession({ session, children }: UserSessionProps) {
+export default function UserSession({ session }: UserSessionProps) {
   const [showAdminLink, setShowAdminLink] = useState(false);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
   const optionsMenu = useRef<HTMLDivElement>(null);
