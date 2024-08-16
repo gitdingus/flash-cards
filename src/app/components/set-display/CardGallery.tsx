@@ -28,7 +28,7 @@ export default function CardGallery({ cards }: CardGalleryProps) {
           {
             cards.map((card) => {
               return(
-                <ExpandableCard key={card.id} card={card} hideTitleOnFlip={display === 'gallery'} />
+                <ExpandableCard key={card.id} card={card} />
               )
             })
           }
