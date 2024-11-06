@@ -2,6 +2,8 @@ import Link from 'next/link';
 import Authentication from '@/app/components/authentication/Authentication';
 import { auth } from '@/auth';
 import AppSessionContext from './context/AppSessionContext';
+import '@/app/styles/main-layout.css';
+
 export const metadata = {
   title: {
     template: 'Flash Cards | %s',
