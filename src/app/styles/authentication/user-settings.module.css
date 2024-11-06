@@ -12,6 +12,7 @@
 .optionsMenu {
   display: none;
   position: absolute;
+  right: 0;
   background-color: white;
   box-shadow: 1px 1px 2px black;
 
