@@ -1,0 +1,7 @@
+.report .reportDialog {
+  display: none;
+}
+
+.report .reportDialog.expanded {
+  display: block;
+}
