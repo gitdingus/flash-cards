@@ -51,23 +51,25 @@ export default function LineInput({ saveLine, editLine, removeLine, line, editMo
     return (
       <div>
         <div>
-          <label>
+          <label htmlFor="heading">
             Heading
-            <input
-              value={ heading }
-              onChange={ (e) => setHeading(e.target.value) }
-              ref={headingInput}
-            />
           </label>
+          <input
+            id="heading"
+            value={ heading }
+            onChange={ (e) => setHeading(e.target.value) }
+            ref={headingInput}
+          />
         </div>
         <div>
-          <label>
+          <label htmlFor="content">
             Content
-            <textarea
-              value={ content }
-              onChange={ (e) => setContent(e.target.value) }
-            ></textarea>
           </label>
+          <textarea
+            id="content"
+            value={ content }
+            onChange={ (e) => setContent(e.target.value) }
+          ></textarea>
         </div>
         <div>
           <button type="button" onClick={toggleEditMode}>Check</button>

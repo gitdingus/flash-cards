@@ -76,25 +76,25 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
         <div>
           <h2>Set Information</h2>
           <div>
-            <label>
+            <label htmlFor="setTitle">
               Title
-              <input
-                id="setTitle"
-                type="text"
-                value={setTitle}
-                onChange={(e) => { setSetTitle(e.target.value) }}
-              />
             </label>
+            <input
+              id="setTitle"
+              type="text"
+              value={setTitle}
+              onChange={(e) => { setSetTitle(e.target.value) }}
+            />
           </div>
           <div>
-            <label>
+            <label htmlFor="setDescription">
               Description
-              <textarea
-                id="setDescription"
-                value={description}
-                onChange={(e) => { setDescription(e.target.value) }}
-              ></textarea>
             </label>
+            <textarea
+              id="setDescription"
+              value={description}
+              onChange={(e) => { setDescription(e.target.value) }}
+            ></textarea>
           </div>
         </div>
         <div>
@@ -164,10 +164,10 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
           }
         </div>
         <div>
-          <label>
+          <label htmlFor="publicCheckbox">
             Public
-            <input type="checkbox" name="public" defaultChecked={isPublic} onChange={(e) => setIsPublic(!isPublic)} />
           </label>
+          <input id="publicCheckbox" type="checkbox" name="public" defaultChecked={isPublic} onChange={(e) => setIsPublic(!isPublic)} />
         </div>
         <button type="submit">Create Set</button>
       </form>

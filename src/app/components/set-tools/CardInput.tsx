@@ -56,15 +56,15 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
       <div>
         <h3>Front</h3>
         <div>
-          <label>
+          <label htmlFor="cardTitle">
             Title
-            <input
-              id="cardTitle"
-              type="text"
-              value={cardTitle}
-              onChange={(e) => { setCardTitle(e.target.value) }}
-            />
           </label>
+          <input
+            id="cardTitle"
+            type="text"
+            value={cardTitle}
+            onChange={(e) => { setCardTitle(e.target.value) }}
+          />
         </div>
       </div>
       <div>
