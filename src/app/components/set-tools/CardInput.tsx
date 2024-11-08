@@ -55,7 +55,7 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
     <div>
       <div>
         <h3>Front</h3>
-        <div>
+        <div className="form-input">
           <label htmlFor="cardTitle">
             Title
           </label>

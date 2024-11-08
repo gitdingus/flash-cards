@@ -50,7 +50,7 @@ export default function LineInput({ saveLine, editLine, removeLine, line, editMo
   if (editing) {
     return (
       <div>
-        <div>
+        <div className="form-input">
           <label htmlFor="heading">
             Heading
           </label>
@@ -61,7 +61,7 @@ export default function LineInput({ saveLine, editLine, removeLine, line, editMo
             ref={headingInput}
           />
         </div>
-        <div>
+        <div className="form-input">
           <label htmlFor="content">
             Content
           </label>

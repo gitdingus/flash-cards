@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import { createSet } from '@/actions/set-actions';
 import CardInput from './CardInput';
+import '@/app/styles/set-tools/set-input.css';
 
 interface SetInputProps {
   submitAction: ({ newSet, cardsInSet }: { newSet: SetInfoBase, cardsInSet: CardInSet[]}, formData: FormData) => void,
@@ -75,7 +76,7 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
       <form action={submitActionWithData}>
         <div>
           <h2>Set Information</h2>
-          <div>
+          <div className="form-input">
             <label htmlFor="setTitle">
               Title
             </label>
@@ -86,7 +87,7 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
               onChange={(e) => { setSetTitle(e.target.value) }}
             />
           </div>
-          <div>
+          <div className="form-input">
             <label htmlFor="setDescription">
               Description
             </label>
