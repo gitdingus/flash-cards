@@ -72,7 +72,7 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
   }
 
   return (
-    <div>
+    <div className="form-container">
       <form action={submitActionWithData}>
         <div>
           <h2>Set Information</h2>

@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+.form-container {
+  width: 60%;
+}
+form * {
+  font-family: 'Roboto';
+}
+
+form .form-input {
+  display: grid;
+  gap: .5rem;
+  grid-template-columns: 150px 1fr;
+
+  margin: 1rem;
+}
+
+form .form-input label {
+  justify-self: end;
+}
