@@ -18,3 +18,7 @@ form .form-input {
 form .form-input label {
   justify-self: end;
 }
+
+.cards.collapsed {
+  display: none;
+}

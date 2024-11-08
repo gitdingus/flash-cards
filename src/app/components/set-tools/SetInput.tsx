@@ -3,7 +3,11 @@ import { useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import { createSet } from '@/actions/set-actions';
 import CardInput from './CardInput';
+import Image from 'next/image';
 import '@/app/styles/set-tools/set-input.css';
+import addCardSvg from '@/app/images/plus.svg';
+import collapseCardsSvg from '@/app/images/minus.svg';
+import expandCardsSvg from '@/app/images/chevron-down.svg';
 
 interface SetInputProps {
   submitAction: ({ newSet, cardsInSet }: { newSet: SetInfoBase, cardsInSet: CardInSet[]}, formData: FormData) => void,
@@ -21,6 +25,7 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
   const [ description, setDescription ] = useState(set?.description || '');
   const [ cards, setCards ] = useState<CardBase[]>(set?.cards || []);
   const [ isPublic, setIsPublic ] = useState(set ? set.isPublic : true);
+  const [ cardsHidden, setCardsHidden ] = useState(false);
   const [ activeCard, setActiveCard ] = useState<CardBase | null>(null);
 
   const compileSetData = () => {
@@ -99,44 +104,59 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
           </div>
         </div>
         <div>
-          <h2>Cards</h2>
-          {
-            cards.map((card, index) => {
-              return (
-                <div key={card.id}>
-                  <p>{card.front.title}</p>
-                  <button type="button" 
-                    onClick={() => {
-                      setActiveCard(card);
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button type="button"
-                    onClick={() => {
-                      defaultRemoveCard(card);
-                      if (removeCard) {
-                        removeCard(card);
+          <div>
+            <h2>Cards</h2>
+            <button type="button" onClick={() => setCardsHidden(!cardsHidden)}>
+              {
+                cardsHidden ?
+                <Image src={expandCardsSvg} alt="expand cards" height={25} width={25} /> :
+                <Image src={collapseCardsSvg} alt="collapse cards" height={25} width={25} />
+              }
+            </button>
+            <button type="button"><Image src={addCardSvg} alt="add card" height="25" width="25" /></button>
+          </div>
+          <div className={`cards ${cardsHidden ? 'collapsed' : ''}`}>
+            {
+              cards.length > 0 && 
+              cards.map((card, index) => {
+                return (
+                  <div key={card.id}>
+                    <p>{card.front.title}</p>
+                    <button type="button"
+                      onClick={() => {
+                        setActiveCard(card);
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button type="button"
+                      onClick={() => {
+                        defaultRemoveCard(card);
+                        if (removeCard) {
+                          removeCard(card);
+                        }
+                      }}
+                    >
+                      Delete
+                    </button>
+                    <ul>
+                      {
+                        card.back.lines.map((line, lineIndex) => {
+                          return (
+                            <li key={`card-${index}line-${lineIndex}`}>
+                              <p><span>{line.heading}</span>: <span>{line.content}</span></p>
+                            </li>
+                          )
+                        })
                       }
-                    }}
-                  >
-                    Delete
-                  </button>
-                  <ul>
-                    {
-                      card.back.lines.map((line, lineIndex) => {
-                        return (
-                          <li key={`card-${index}line-${lineIndex}`}>
-                            <p><span>{line.heading}</span>: <span>{line.content}</span></p>
-                          </li>
-                        )
-                      })
-                    }
-                  </ul>
-                </div>
-              )
-            })
-          }
+                    </ul>
+                  </div>
+                )
+              })
+              ||
+              <p>No cards to display</p>
+            }
+          </div>
           {
             activeCard !== null &&
             <CardInput 
