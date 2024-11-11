@@ -6,6 +6,7 @@ import CardInput from './CardInput';
 import Image from 'next/image';
 import '@/app/styles/set-tools/set-input.css';
 import addCardSvg from '@/app/images/plus.svg';
+import cancelAddCardSvg from '@/app/images/close.svg';
 import collapseCardsSvg from '@/app/images/minus.svg';
 import expandCardsSvg from '@/app/images/chevron-down.svg';
 
@@ -26,6 +27,7 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
   const [ cards, setCards ] = useState<CardBase[]>(set?.cards || []);
   const [ isPublic, setIsPublic ] = useState(set ? set.isPublic : true);
   const [ cardsHidden, setCardsHidden ] = useState(false);
+  const [ showCardInput, setShowCardInput ] = useState(false);
   const [ activeCard, setActiveCard ] = useState<CardBase | null>(null);
 
   const compileSetData = () => {
@@ -77,7 +79,7 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
   }
 
   return (
-    <div className="form-container">
+    <div className="form-container card-input-container">
       <form action={submitActionWithData}>
         <div>
           <h2>Set Information</h2>
@@ -113,7 +115,13 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
                 <Image src={collapseCardsSvg} alt="collapse cards" height={25} width={25} />
               }
             </button>
-            <button type="button"><Image src={addCardSvg} alt="add card" height="25" width="25" /></button>
+            <button type="button" onClick={() => setShowCardInput(!showCardInput)}>
+              {
+                showCardInput ?
+                <Image src={cancelAddCardSvg} alt="add card" height="25" width="25" /> :
+                <Image src={addCardSvg} alt="cancel add card" height={25} width={25} />
+              }
+            </button>
           </div>
           <div className={`cards ${cardsHidden ? 'collapsed' : ''}`}>
             {
@@ -125,6 +133,7 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
                     <button type="button"
                       onClick={() => {
                         setActiveCard(card);
+                        setShowCardInput(true);
                       }}
                     >
                       Edit
@@ -158,30 +167,39 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
             }
           </div>
           {
-            activeCard !== null &&
-            <CardInput 
-              key={activeCard?.id}
-              saveCard={(newCard) => {
-                defaultEditCard(newCard)
-                if (editCard) {
-                  editCard(newCard);
-                }
-              }}
-              removeLine={ removeLine ? removeLine : undefined }
-              editLine={ editLine ? editLine : undefined }
-              saveLine={ saveLine ? saveLine : undefined }
-              card={activeCard}
-            />
-          }
-          {
-            activeCard === null &&
-            <CardInput 
-              saveCard={(card) => {
-                defaultSaveCard(card)
-                if (saveCard) 
-                  saveCard(card);
-              }} 
-            />
+            showCardInput && 
+            <div className={`card-input`}>
+              <button onClick={() => setShowCardInput(false)}>Close</button>
+              {
+                activeCard !== null &&
+                <CardInput
+                  key={activeCard?.id}
+                  saveCard={(newCard) => {
+                    defaultEditCard(newCard)
+                    if (editCard) {
+                      editCard(newCard);
+                    }
+                    setShowCardInput(false)
+                  }}
+                  removeLine={ removeLine ? removeLine : undefined }
+                  editLine={ editLine ? editLine : undefined }
+                  saveLine={ saveLine ? saveLine : undefined }
+                  card={activeCard}
+                />
+              }
+              {
+                activeCard === null &&
+                <CardInput
+                  saveCard={(card) => {
+                    defaultSaveCard(card)
+                    if (saveCard) {
+                      saveCard(card);
+                    }
+                    setShowCardInput(false);
+                  }}
+                />
+              }
+            </div>
           }
         </div>
         <div>
