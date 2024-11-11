@@ -115,7 +115,13 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
                 <Image src={collapseCardsSvg} alt="collapse cards" height={25} width={25} />
               }
             </button>
-            <button type="button" onClick={() => setShowCardInput(!showCardInput)}>
+            <button 
+              type="button" 
+              onClick={() => {
+                setActiveCard(null);
+                setShowCardInput(!showCardInput);
+              }}
+            >
               {
                 showCardInput ?
                 <Image src={cancelAddCardSvg} alt="add card" height="25" width="25" /> :
