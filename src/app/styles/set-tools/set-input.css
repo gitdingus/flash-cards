@@ -19,8 +19,36 @@ form .form-input label {
   justify-self: end;
 }
 
+.cards-title-bar {
+  display: flex;
+}
+
+.cards-title-bar h2 {
+  flex: 1;
+}
 .cards.collapsed {
   display: none;
+}
+
+.card .card-title {
+  display: flex;
+}
+
+.card .card-title p {
+  flex: 1;
+  cursor: pointer;
+}
+
+.card .card-title p:hover {
+  text-decoration: underline;
+}
+
+.card .card-lines {
+  display: none;
+}
+
+.card .card-lines.expanded {
+  display: block;
 }
 
 .card-input-container {

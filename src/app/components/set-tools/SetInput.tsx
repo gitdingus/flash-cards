@@ -9,6 +9,8 @@ import addCardSvg from '@/app/images/plus.svg';
 import cancelAddCardSvg from '@/app/images/close.svg';
 import collapseCardsSvg from '@/app/images/minus.svg';
 import expandCardsSvg from '@/app/images/chevron-down.svg';
+import editSvg from '@/app/images/text-box-edit-outline.svg';
+import deleteSvg from '@/app/images/trash-can-outline.svg';
 
 interface SetInputProps {
   submitAction: ({ newSet, cardsInSet }: { newSet: SetInfoBase, cardsInSet: CardInSet[]}, formData: FormData) => void,
@@ -106,7 +108,7 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
           </div>
         </div>
         <div>
-          <div>
+          <div className="cards-title-bar">
             <h2>Cards</h2>
             <button type="button" onClick={() => setCardsHidden(!cardsHidden)}>
               {
@@ -134,38 +136,23 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
               cards.length > 0 && 
               cards.map((card, index) => {
                 return (
-                  <div key={card.id}>
-                    <p>{card.front.title}</p>
-                    <button type="button"
-                      onClick={() => {
+                  <CardLine 
+                    key={card.id}
+                    card={card}
+                    cardActions={{
+                      click: (card) => {console.log('clicked', card.front.title)},
+                      edit: (card) => {
                         setActiveCard(card);
                         setShowCardInput(true);
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button type="button"
-                      onClick={() => {
+                      },
+                      delete: (card) => {
                         defaultRemoveCard(card);
                         if (removeCard) {
                           removeCard(card);
                         }
-                      }}
-                    >
-                      Delete
-                    </button>
-                    <ul>
-                      {
-                        card.back.lines.map((line, lineIndex) => {
-                          return (
-                            <li key={`card-${index}line-${lineIndex}`}>
-                              <p><span>{line.heading}</span>: <span>{line.content}</span></p>
-                            </li>
-                          )
-                        })
                       }
-                    </ul>
-                  </div>
+                    }}
+                  />
                 )
               })
               ||
@@ -216,6 +203,54 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
         </div>
         <button type="submit">Create Set</button>
       </form>
+    </div>
+  )
+}
+
+interface CardLineProps {
+  card: CardBase,
+  cardActions: {
+    click: (card: CardBase) => void,
+    edit: (card: CardBase) => void,
+    delete: (card: CardBase) => void,
+  }
+}
+
+function CardLine({ card, cardActions }: CardLineProps) {
+  const [ expandDetails, setExpandDetails ] = useState(false);
+
+  return (
+    <div className="card" key={card.id}>
+      <div className="card-title">
+        <p onClick={() => setExpandDetails(!expandDetails)}>{card.front.title}</p>
+        <button type="button"
+          onClick={() => {
+            cardActions.edit(card);
+          }}
+        >
+          <Image src={editSvg} alt={`edit card ${card.front.title}`} width={25} height={25} />
+        </button>
+        <button type="button"
+          onClick={() => {
+            cardActions.delete(card);
+          }}
+        >
+          <Image src={deleteSvg} alt={`edit card ${card.front.title}`} width={25} height={25} />
+        </button>
+      </div>
+      <div className={`card-lines ${expandDetails ? 'expanded' : ''}`}>
+        <ul>
+          {
+            card.back.lines.map((line, lineIndex) => {
+              return (
+                <li key={`card-${card.id}line-${lineIndex}`}>
+                  <p><span>{line.heading}</span>: <span>{line.content}</span></p>
+                </li>
+              )
+            })
+          }
+        </ul>
+      </div>
     </div>
   )
 }
