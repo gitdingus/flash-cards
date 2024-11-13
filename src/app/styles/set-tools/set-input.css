@@ -18,6 +18,11 @@
 
 #set-form .title-bar {
   border-bottom: 1px solid black;
+  margin-bottom: 1rem;
+}
+
+#set-form .title-bar h2 {
+  margin: .25rem 0;
 }
 
 #set-form .form-input {
