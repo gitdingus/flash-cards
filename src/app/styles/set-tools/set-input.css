@@ -4,18 +4,18 @@
   width: 60%;
 }
 
-form * {
+#set-form * {
   font-family: 'Roboto';
 }
 
-form>div {
+#set-form>div {
   margin: 2rem;
   padding: 1rem;
   border-radius: 5px;
   box-shadow: 1px 1px 2px black;
 }
 
-form .form-input {
+#set-form .form-input {
   display: grid;
   gap: .5rem;
   grid-template-columns: 150px 1fr;
@@ -23,7 +23,7 @@ form .form-input {
   margin: 1rem;
 }
 
-form .form-input label {
+#set-form .form-input label {
   justify-self: end;
 }
 
