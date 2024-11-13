@@ -84,7 +84,7 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
     <div className="form-container">
       <form action={submitActionWithData} id="set-form">
         <div>
-          <h2>Set Information</h2>
+          <h2>Set</h2>
           <div className="form-input">
             <label htmlFor="setTitle">
               Title
@@ -199,7 +199,7 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
           </label>
           <input id="publicCheckbox" type="checkbox" name="public" defaultChecked={isPublic} onChange={(e) => setIsPublic(!isPublic)} />
         </div>
-        <div><button type="submit">Create Set</button></div>
+        <div className="buttons"><button type="submit">Create Set</button></div>
       </form>
     </div>
   )
