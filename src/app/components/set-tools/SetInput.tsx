@@ -199,7 +199,7 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
           </label>
           <input id="publicCheckbox" type="checkbox" name="public" defaultChecked={isPublic} onChange={(e) => setIsPublic(!isPublic)} />
         </div>
-        <button type="submit">Create Set</button>
+        <div><button type="submit">Create Set</button></div>
       </form>
     </div>
   )
