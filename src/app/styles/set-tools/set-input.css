@@ -3,8 +3,16 @@
 .form-container {
   width: 60%;
 }
+
 form * {
   font-family: 'Roboto';
+}
+
+form>div {
+  margin: 2rem;
+  padding: 1rem;
+  border-radius: 5px;
+  box-shadow: 1px 1px 2px black;
 }
 
 form .form-input {
@@ -26,6 +34,12 @@ form .form-input label {
 .cards-title-bar h2 {
   flex: 1;
 }
+
+.cards-title-bar button {
+  background-color: transparent;
+  border: 0;
+}
+
 .cards-list.collapsed {
   display: none;
 }
@@ -37,6 +51,8 @@ form .form-input label {
 .card-input-container.expanded {
   display: block;
 }
+
+
 .card .card-title {
   display: flex;
 }
@@ -48,6 +64,11 @@ form .form-input label {
 
 .card .card-title p:hover {
   text-decoration: underline;
+}
+
+.card .card-title button {
+  background-color: transparent;
+  border: none;
 }
 
 .card .card-lines {
