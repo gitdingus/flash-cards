@@ -9,7 +9,7 @@
 }
 
 #set-form>div {
-  margin: 2rem;
+  margin: 2rem 0;
   padding: 1rem;
   border-radius: 5px;
   box-shadow: 1px 1px 2px black;
@@ -25,6 +25,10 @@
 
 #set-form .form-input label {
   justify-self: end;
+}
+
+#set-form textarea {
+  resize: vertical;
 }
 
 .cards-title-bar {
@@ -79,4 +83,17 @@
   display: block;
 }
 
+#set-form .buttons {
+  box-shadow: none;
+  display: flex;
+  justify-content: flex-end;
+  margin: 0;
+  padding: 0;
+}
+
+#set-form .buttons button {
+  font-size: 1rem;
+  padding: 1rem 2rem;
+  border-radius: 5px;
+}
 
