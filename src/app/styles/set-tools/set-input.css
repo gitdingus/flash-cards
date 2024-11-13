@@ -46,6 +46,9 @@
   resize: vertical;
 }
 
+#set-form button:has(img):hover {
+  transform: scale(1.1);
+}
 .cards-title-bar {
   display: flex;
 }
