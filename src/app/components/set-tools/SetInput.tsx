@@ -81,7 +81,7 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
   }
 
   return (
-    <div className="form-container card-input-container">
+    <div className="form-container">
       <form action={submitActionWithData}>
         <div>
           <h2>Set Information</h2>
@@ -131,38 +131,8 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
               }
             </button>
           </div>
-          <div className={`cards ${cardsHidden ? 'collapsed' : ''}`}>
-            {
-              cards.length > 0 && 
-              cards.map((card, index) => {
-                return (
-                  <CardLine 
-                    key={card.id}
-                    card={card}
-                    cardActions={{
-                      click: (card) => {console.log('clicked', card.front.title)},
-                      edit: (card) => {
-                        setActiveCard(card);
-                        setShowCardInput(true);
-                      },
-                      delete: (card) => {
-                        defaultRemoveCard(card);
-                        if (removeCard) {
-                          removeCard(card);
-                        }
-                      }
-                    }}
-                  />
-                )
-              })
-              ||
-              <p>No cards to display</p>
-            }
-          </div>
-          {
-            showCardInput && 
+          <div className={`card-input-container ${showCardInput ? 'expanded' : ''}`}>
             <div className={`card-input`}>
-              <button onClick={() => setShowCardInput(false)}>Close</button>
               {
                 activeCard !== null &&
                 <CardInput
@@ -193,7 +163,35 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
                 />
               }
             </div>
-          }
+          </div>  
+          <div className={`cards-list ${cardsHidden ? 'collapsed' : ''}`}>
+            {
+              cards.length > 0 && 
+              cards.map((card, index) => {
+                return (
+                  <CardLine 
+                    key={card.id}
+                    card={card}
+                    cardActions={{
+                      click: (card) => {console.log('clicked', card.front.title)},
+                      edit: (card) => {
+                        setActiveCard(card);
+                        setShowCardInput(true);
+                      },
+                      delete: (card) => {
+                        defaultRemoveCard(card);
+                        if (removeCard) {
+                          removeCard(card);
+                        }
+                      }
+                    }}
+                  />
+                )
+              })
+              ||
+              <p>No cards to display</p>
+            }
+          </div>
         </div>
         <div>
           <label htmlFor="publicCheckbox">

@@ -26,10 +26,17 @@ form .form-input label {
 .cards-title-bar h2 {
   flex: 1;
 }
-.cards.collapsed {
+.cards-list.collapsed {
   display: none;
 }
 
+.card-input-container {
+  display: none;
+}
+
+.card-input-container.expanded {
+  display: block;
+}
 .card .card-title {
   display: flex;
 }
@@ -51,16 +58,4 @@ form .form-input label {
   display: block;
 }
 
-.card-input-container {
-  position: relative;
-}
 
-.card-input {
-  background-color: white;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-}
