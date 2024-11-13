@@ -69,6 +69,15 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
       </div>
       <div>
         <h3>Back</h3>
+        <LineInput 
+          saveLine={(line: Line) => {
+            defaultSaveLine(line);
+            if (card && saveLine) {
+              saveLine(line, card);
+            }
+          }}
+          focusOnSave={true}
+        />
         {
           lines.map((line, index) => {
             return (
@@ -98,15 +107,6 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
             )
           })
         }
-        <LineInput 
-          saveLine={(line: Line) => {
-            defaultSaveLine(line);
-            if (card && saveLine) {
-              saveLine(line, card);
-            }
-          }}
-          focusOnSave={true}
-        />
       </div>
       <button type="button" onClick={save}>Save Card</button>
     </div>
