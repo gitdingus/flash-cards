@@ -2,6 +2,7 @@
 
 .form-container {
   width: 60%;
+  padding: 0 2rem;
 }
 
 #set-form * {
@@ -10,21 +11,35 @@
 
 #set-form>div {
   margin: 2rem 0;
-  padding: 1rem;
+  padding: 1rem 3rem;
   border-radius: 5px;
   box-shadow: 1px 1px 2px black;
 }
 
+#set-form .title-bar {
+  border-bottom: 1px solid black;
+}
+
 #set-form .form-input {
   display: grid;
-  gap: .5rem;
+  gap: .75rem;
   grid-template-columns: 150px 1fr;
 
+  align-items: center;
   margin: 1rem;
 }
 
 #set-form .form-input label {
   justify-self: end;
+}
+
+#set-form input,
+#set-form textarea {
+  font-size: 1rem;
+  padding: .5rem 1rem;
+  border: 0;
+  border-radius: 5px;
+  box-shadow: 1px 1px 2px black;
 }
 
 #set-form textarea {

@@ -84,7 +84,9 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
     <div className="form-container">
       <form action={submitActionWithData} id="set-form">
         <div>
-          <h2>Set</h2>
+          <div className="title-bar">
+            <h2>Set</h2>
+          </div>
           <div className="form-input">
             <label htmlFor="setTitle">
               Title
@@ -108,7 +110,7 @@ export default function SetInput({ submitAction, saveLine, editLine, removeLine,
           </div>
         </div>
         <div>
-          <div className="cards-title-bar">
+          <div className="title-bar cards-title-bar">
             <h2>Cards</h2>
             <button type="button" onClick={() => setCardsHidden(!cardsHidden)}>
               {
