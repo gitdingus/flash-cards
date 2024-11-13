@@ -1,0 +1,15 @@
+.line {
+  margin: 2rem 1rem;
+}
+
+.line .line-heading {
+  display: flex;
+}
+
+.line .line-heading h3 {
+  flex: 1;
+}
+
+.line .line-content {
+  padding-left: 1rem;
+}

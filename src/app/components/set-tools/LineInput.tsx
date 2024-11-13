@@ -1,6 +1,10 @@
 'use client';
 import { useRef, useState } from 'react';
 import { v4 as uuid } from 'uuid';
+import Image from 'next/image';
+import editSvg from '@/app/images/text-box-edit-outline.svg';
+import deleteSvg from '@/app/images/trash-can-outline.svg';
+import '@/app/styles/set-tools/line-input.css';
 
 interface LineInputProps {
   saveLine: (line: Line) => void,
@@ -72,16 +76,21 @@ export default function LineInput({ saveLine, editLine, removeLine, line, editMo
           ></textarea>
         </div>
         <div>
-          <button type="button" onClick={toggleEditMode}>Check</button>
+          <button type="button" onClick={toggleEditMode}>Add to card</button>
         </div>
       </div>  
     )
   } else {
     return (
-      <div>
-        <p><span>{heading}</span>: <span>{content}</span></p>
-        <button type="button" onClick={toggleEditMode}>Edit</button>
-        <button type="button" onClick={() => { if (removeLine) removeLine({id, heading, content}); }}>Delete</button>
+      <div className="line">
+        <div className="line-heading">
+          <h3>{heading}</h3>
+          <button type="button" onClick={toggleEditMode}><Image src={editSvg} alt={`edit line ${heading}`} width={25} height={25} /></button>
+          <button type="button" onClick={() => { if (removeLine) removeLine({id, heading, content}); }}><Image src={deleteSvg} alt={`remove line ${heading}`} width={25} height={25} /></button>
+        </div>
+        <div className="line-content">
+          <p>{content}</p>
+        </div>
       </div>
     )
   }
