@@ -1,0 +1,13 @@
+.cardInput>div{
+  margin-bottom: 1rem;
+}
+.cardInput, 
+.cardInput .contain {
+  padding: 2rem;
+  box-shadow: 1px 1px 2px black;
+  border-radius: 5px;
+}
+
+.cardInput h3 {
+  margin: 0;
+}

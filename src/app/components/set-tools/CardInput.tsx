@@ -2,6 +2,7 @@
 import { v4 as uuid } from 'uuid';
 import { useState } from 'react';
 import LineInput from './LineInput';
+import styles from '@/app/styles/set-tools/card-input.module.css';
 
 interface CardInputProps {
   card?: CardBase,
@@ -52,8 +53,8 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
   }
 
   return (
-    <div>
-      <div>
+    <div className={`${styles.cardInput}`}>
+      <div className={`${styles.contain}`}>
         <h3>Front</h3>
         <div className="form-input">
           <label htmlFor="cardTitle">
@@ -67,7 +68,7 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
           />
         </div>
       </div>
-      <div>
+      <div className={`${styles.contain}`}>
         <h3>Back</h3>
         <LineInput 
           saveLine={(line: Line) => {
@@ -78,11 +79,13 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
           }}
           focusOnSave={true}
         />
+      </div>
+      <div>
         {
           lines.map((line, index) => {
             return (
-              <LineInput 
-                key={line.id} 
+              <LineInput
+                key={line.id}
                 saveLine={(line: Line) => {
                   defaultSaveLine(line)
                   if (card && saveLine) {
@@ -94,21 +97,21 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
                   if (editLine) {
                     editLine(line);
                   }
-                }} 
+                }}
                 removeLine={(line: Line) => {
                   defaultRemoveLine(line);
                   if (removeLine) {
                     removeLine(line);
                   }
                 }}
-                line={line} 
-                editMode={false} 
+                line={line}
+                editMode={false}
               />
             )
           })
         }
       </div>
-      <button type="button" onClick={save}>Save Card</button>
+      <div className="buttons"><button type="button" onClick={save}>Save Card</button></div>
     </div>
   )
 }
