@@ -54,6 +54,7 @@ export default function CardInput({ card, saveCard, saveLine, editLine, removeLi
 
   return (
     <div className={`${styles.cardInput}`}>
+      <p>Create new card</p>
       <div className={`${styles.contain}`}>
         <h3>Front</h3>
         <div className="form-input">
