@@ -75,7 +75,7 @@ export default function LineInput({ saveLine, editLine, removeLine, line, editMo
             onChange={ (e) => setContent(e.target.value) }
           ></textarea>
         </div>
-        <div>
+        <div className='buttons'>
           <button type="button" onClick={toggleEditMode}>Add to card</button>
         </div>
       </div>  
