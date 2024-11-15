@@ -9,7 +9,12 @@ export async function getSet(id: string) {
   const client = await db.connect();
 
   const [ setQuery, cardsQuery, session ] = await Promise.all([
-    client.sql`SELECT * FROM set WHERE id = ${id};`,
+    client.sql`
+      SELECT set.*, users.username AS owner_username
+      FROM set 
+        JOIN users ON (users.id = set.owner)
+      WHERE set.id = ${id};
+    `,
     client.sql`SELECT * FROM card WHERE inset = ${id};`,
     auth(),
   ]);
@@ -33,16 +38,6 @@ export async function getSet(id: string) {
     throw new Error('Set has been removed');
   }
 
-  const set: SetInfo = {
-    id: setRecord.id,
-    title: setRecord.name,
-    description: setRecord.description,
-    dateCreated: setRecord.datecreated,
-    owner: setRecord.owner,
-    isPublic: setRecord.public,
-    lastModified: setRecord.lastmodified,
-  }
-
   const cards: CardBase[] = await Promise.all(cardsQuery.rows.map(async (cardResult) => {
     const linesQuery = await client.sql`SELECT * FROM cardline WHERE cardid = ${cardResult.id}`;
     const lines: Line[] = linesQuery.rows.map((line) => { return { id: line.id, heading: line.heading, content: line.content }});
@@ -56,6 +51,18 @@ export async function getSet(id: string) {
     
     return card;
   }));
+
+  const set: SetInfo = {
+    id: setRecord.id,
+    title: setRecord.name,
+    description: setRecord.description,
+    dateCreated: setRecord.datecreated,
+    owner: setRecord.owner,
+    ownerUsername: setRecord.owner_username,
+    isPublic: setRecord.public,
+    lastModified: setRecord.lastmodified,
+    cardCount: cards.length,
+  }
 
   client.release();
   
@@ -98,11 +105,15 @@ export async function getSetInfo(id: string) {
 
 export async function getAllPublicSets() {
   const result = await sql`
-    SELECT * 
+    SELECT set.*, users.username AS owner_username, count(card.inset) AS card_count
     FROM set 
+      JOIN users ON (users.id = set.owner)
+      JOIN card ON (set.id = card.inset)
     WHERE public = true
       AND hidden = false
-      AND removed = false;
+      AND removed = false
+    GROUP BY set.id, users.username
+    ;
   `; 
 
   const sets = result.rows.map((set) => {
@@ -113,6 +124,8 @@ export async function getAllPublicSets() {
       description: set.description,
       isPublic: set.public,
       owner: set.owner,
+      ownerUsername: set.owner_username,
+      cardCount: set.card_count,
       lastModified: set.lastmodified,
     }
 
@@ -130,7 +143,12 @@ export async function getOwnSets() {
   }
 
   const result = await sql`
-    SELECT * FROM set WHERE owner = ${session?.user.userId} AND removed = false; 
+    SELECT set.*, COUNT(card.inset) AS card_count
+    FROM set 
+    JOIN card ON (set.id = card.inset)
+    WHERE owner = ${session?.user.userId} 
+      AND removed = false
+    GROUP BY set.id;
   `;
 
   const sets = result.rows.map((set) => {
@@ -140,7 +158,9 @@ export async function getOwnSets() {
       dateCreated: set.datecreated,
       description: set.description,
       owner: set.owner,
+      ownerUsername: session.user.username,
       isPublic: set.public,
+      cardCount: set.card_count,
       lastModified: set.lastmodified,
     }
 
@@ -291,25 +311,32 @@ async function getAllowedPrivateSets() {
   }
 
   const setQuery = await sql`
-    SELECT *
+    SELECT set.*, users.username AS owner_username, COUNT(card.inset) AS card_count
     FROM setpermission
     JOIN set
       ON set.id = setpermission.setid
+    JOIN users
+      ON set.owner = users.id
+    JOIN card
+      ON set.id = card.inset
     WHERE set.public = false
       AND set.hidden = false
       AND set.removed = false
       AND setpermission.userid = ${session.user.userId}
-      AND setpermission.granted = true;
+      AND setpermission.granted = true
+    GROUP BY set.id, users.username;
   `;
 
   return setQuery.rows.map((row) => {
     const set: SetInfo = {
       owner: row.owner,
+      ownerUsername: row.owner_username,
       id: row.id,
       title: row.name,
       description: row.description,
       dateCreated: row.datecreated,
       isPublic: row.public,
+      cardCount: row.card_count,
       lastModified: row.lastmodified,
     }
 
