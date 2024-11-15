@@ -2,6 +2,7 @@
 import { useContext, useRef, useState } from 'react';
 import { populateSets } from '../lib/data';
 import { SessionContext } from '@/app/context/SessionContext';
+import styles from '@/app/styles/cards/set-list.module.css';
 
 interface SetListProps {
   initialSets: SetInfo[],
@@ -58,18 +59,21 @@ export default function SetList({ initialSets }: SetListProps) {
           }
         </fieldset>
       </form>
-      {
-        sets.map((set) => {
-          return (
-            <div key={set.id}>
-              <p><a href={`/set/${set.id}`}>{set.title}</a><span>{set.dateCreated.toLocaleString()}</span></p>
-              <div>
-                <p>{set.description}</p>
-              </div>
-            </div>
-          )
-        })
-      }
+      <div className={`${styles.setList}`}>
+        {
+          sets.map((set) => <SetThumb key={set.id} set={set} />)
+        }
+      </div>
+    </div>
+  )
+}
+
+function SetThumb({ set }: { set: SetInfo }) {
+  return (
+    <div className={`${styles.setThumb}`}>
+      <h2>{set.title}</h2>
+      <p>{set.description}</p>
+      <p><a href={`/set/${set.id}`}>View</a></p>
     </div>
   )
 }
