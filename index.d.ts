@@ -31,6 +31,8 @@ interface SetInfoBase {
 
 interface SetInfo extends SetInfoBase {
   owner: string,
+  ownerUsername: string,
+  cardCount: number,
 }
 
 interface SetOfCards extends SetInfo{
