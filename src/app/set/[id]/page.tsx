@@ -1,6 +1,5 @@
 import { sql } from '@vercel/postgres';
 import { getSet } from '@/app/lib/data';
-import { getUserById } from '@/app/lib/accounts';
 import { auth } from '@/auth';
 import { hasAccessToSet } from '@/app/lib/permissions';
 import CardGallery from '@/app/components/set-display/CardGallery';
@@ -21,8 +20,6 @@ export default async function SetInfo({ params }: { params: { id: string } }) {
     return <div>Not Found</div>
   }
   
-  const owner = await getUserById(set.owner);
-
   if (set.isPublic === false) {
     if (!session || !(await hasAccessToSet(set.owner, session.user.userId, set.id))) {
       return <div>Not allowed</div>
@@ -34,8 +31,8 @@ export default async function SetInfo({ params }: { params: { id: string } }) {
       <h1>{set.title}</h1>
       <p>{set.description}</p>
       {
-        owner &&
-        <p>Created by: <span><a href={`/user/${owner.username}`}>{owner.username}</a></span></p>
+        set.ownerUsername &&
+        <p>Created by: <span><a href={`/user/${set.ownerUsername}`}>{set.ownerUsername}</a></span></p>
       }
       {
         session?.user &&
