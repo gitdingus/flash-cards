@@ -6,17 +6,54 @@
 }
 
 .setThumb {
-  box-shadow: 1px 1px 2px black;
-  border-radius: 20px;
+  background-color: #f8fafc;
+  box-shadow: 1px 1px 2px #94a3b8;
+  border-radius: 10px;
   padding: 2rem;
-  transition: transform 50ms ease-out;
+  transition: transform 100ms ease-in-out;
+  display: grid;
 }
 
 .setThumb:hover {
   box-shadow: 1px 1px 3px black;
   transform: scale(1.01);
 }
-.setThumb h2 {
+
+.setThumb:hover .title a {
+  transform: scaleX(1.05);
+}
+
+.setThumb a {
+  display: inline-block;
+  transform-origin: bottom left;
+  transition: transform 75ms ease-in-out;
+  text-decoration: none;
+  color: #44403c;
+}
+
+.setThumb .description {
+  color: #44403c;
+  padding-left: .75rem;
+}
+
+.setThumb .cardCount {
+  color: #a8a29e;
+}
+
+.setThumb a:hover {
+  transform: scale(1.1);
+}
+
+.setThumb .title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
+  grid-area: 1 / 1 / 2 / 3;
+}
+
+.setThumb .link {
+  grid-area: 3 / 1 / 4 / 2;
+}
+
+.setThumb .cardCount {
+  grid-area: 3 / 2 / 4 / 3;
 }

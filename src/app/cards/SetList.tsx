@@ -71,9 +71,10 @@ export default function SetList({ initialSets }: SetListProps) {
 function SetThumb({ set }: { set: SetInfo }) {
   return (
     <div className={`${styles.setThumb}`}>
-      <h2>{set.title}</h2>
-      <p>{set.description}</p>
-      <p><a href={`/set/${set.id}`}>View</a></p>
+      <h2 className={styles.title}><a href={`/set/${set.id}`}>{set.title}</a></h2>
+      <p className={styles.description}>{set.description}</p>
+      <p className={styles.link}><a href={`/user/${set.ownerUsername}`}>{set.ownerUsername}</a></p>
+      <p className={styles.cardCount}>{set.cardCount} card(s)</p>
     </div>
   )
 }
