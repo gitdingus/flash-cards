@@ -370,7 +370,7 @@ export async function populateSets(formData: FormData) {
   }
 }
 
-async function getAllowedPrivateSets(params?: SetInfoQueryConfig) {
+export async function getAllowedPrivateSets(params?: SetInfoQueryConfig) {
   const [ session ] = await Promise.all([
     auth(),
   ]);
