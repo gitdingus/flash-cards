@@ -103,8 +103,50 @@ export async function getSetInfo(id: string) {
   return set;
 }
 
-export async function getAllPublicSets() {
-  const result = await sql`
+type SetColumns = "datecreated" | "set.datecreated";
+type SortDirection = "ASC" | "DESC";
+
+interface SetInfoQueryConfig {
+  limit?: number,
+  offset?: number,
+  sort?: {
+    column?: SetColumns,
+    direction?: SortDirection,
+  },
+}
+
+const defaultSetInfoQueryConfig: SetInfoQueryConfig = {
+  limit: 10,
+  offset: 0,
+  sort: {
+    column: 'datecreated',
+    direction: 'DESC'
+  }
+}
+
+const DEFAULT_LIMIT = 10;
+const DEFAULT_OFFSET = 0;
+const DEFAULT_SORT_COLUMN = 'set.datecreated';
+const DEFAULT_SORT_DIRECTION = 'DESC';
+
+export async function getAllPublicSets(params?: SetInfoQueryConfig) {
+
+  const config: SetInfoQueryConfig = {};
+  config.limit = params?.limit || DEFAULT_LIMIT;
+  config.offset = params?.offset || DEFAULT_OFFSET;
+  config.sort = {};
+
+  switch (params?.sort?.column) {
+    case "datecreated":
+    default: 
+      config.sort.column = DEFAULT_SORT_COLUMN;
+  }
+  config.sort.direction = params?.sort?.direction || DEFAULT_SORT_DIRECTION;
+
+  const client = await db.connect();
+
+  const queryArgs = [config.limit, config.offset];
+  const queryString = `
     SELECT set.*, users.username AS owner_username, count(card.inset) AS card_count
     FROM set 
       JOIN users ON (users.id = set.owner)
@@ -113,10 +155,15 @@ export async function getAllPublicSets() {
       AND hidden = false
       AND removed = false
     GROUP BY set.id, users.username
+    ORDER BY ${config.sort.column} ${config.sort.direction === "ASC" ? "ASC" : "DESC"}
+    LIMIT $1
+    OFFSET $2
     ;
-  `; 
+  `;
 
-  const sets = result.rows.map((set) => {
+  const query = await client.query(queryString, queryArgs);
+
+  const sets = query.rows.map((set) => {
     const cardSet: SetInfo = {
       id: set.id,
       title: set.name,
@@ -135,23 +182,45 @@ export async function getAllPublicSets() {
   return sets;
 }
 
-export async function getOwnSets() {
+export async function getOwnSets(params?: SetInfoQueryConfig) {
   const session = await auth();
 
-  if (!session) {
+  if (!session || !session.user.userId) {
     throw new Error('Forbidden');
   }
 
-  const result = await sql`
+  const config: SetInfoQueryConfig = {};
+  config.limit = params?.limit || DEFAULT_LIMIT;
+  config.offset = params?.offset || DEFAULT_OFFSET;
+  config.sort = {};
+  
+  switch (params?.sort?.column) {
+    case "datecreated":
+    default:
+      config.sort.column = DEFAULT_SORT_COLUMN;
+  }
+
+  config.sort.direction = params?.sort?.direction || DEFAULT_SORT_DIRECTION;
+
+  const queryParams = [session.user.userId, config.limit, config.offset];
+
+  const queryString = `
     SELECT set.*, COUNT(card.inset) AS card_count
     FROM set 
     JOIN card ON (set.id = card.inset)
-    WHERE owner = ${session?.user.userId} 
+    WHERE owner = $1
       AND removed = false
-    GROUP BY set.id;
+    GROUP BY set.id
+    ORDER BY ${config.sort.column} ${config.sort.direction === "ASC" ? "ASC" : "DESC"}
+    LIMIT $2
+    OFFSET $3
+    ;
   `;
 
-  const sets = result.rows.map((set) => {
+  const client = await db.connect();
+  const query = await client.query(queryString, queryParams);
+
+  const sets = query.rows.map((set) => {
     const cardSet: SetInfo = {
       id: set.id,
       title: set.name,
@@ -301,7 +370,7 @@ export async function populateSets(formData: FormData) {
   }
 }
 
-async function getAllowedPrivateSets() {
+async function getAllowedPrivateSets(params?: SetInfoQueryConfig) {
   const [ session ] = await Promise.all([
     auth(),
   ]);
@@ -309,8 +378,21 @@ async function getAllowedPrivateSets() {
   if (!session) {
     throw new Error('Unauthorized');
   }
+  const config: SetInfoQueryConfig = {};
+  config.limit = params?.limit || DEFAULT_LIMIT;
+  config.offset = params?.offset || DEFAULT_OFFSET;
+  config.sort = {};
 
-  const setQuery = await sql`
+  switch (params?.sort?.column) {
+    case 'datecreated':
+    default:
+      config.sort.column = DEFAULT_SORT_COLUMN;
+  }
+
+  config.sort.direction = params?.sort?.direction === "ASC" ? "ASC" : "DESC";
+
+  const queryArgs = [session.user.userId, config.limit, config.offset];
+  const queryString = `
     SELECT set.*, users.username AS owner_username, COUNT(card.inset) AS card_count
     FROM setpermission
     JOIN set
@@ -322,12 +404,19 @@ async function getAllowedPrivateSets() {
     WHERE set.public = false
       AND set.hidden = false
       AND set.removed = false
-      AND setpermission.userid = ${session.user.userId}
+      AND setpermission.userid = $1
       AND setpermission.granted = true
-    GROUP BY set.id, users.username;
+    GROUP BY set.id, users.username
+    ORDER BY ${config.sort.column} ${config.sort.direction}
+    LIMIT $2
+    OFFSET $3
+    ;
   `;
 
-  return setQuery.rows.map((row) => {
+  const client = await db.connect();
+  const query = await client.query(queryString, queryArgs);
+
+  return query.rows.map((row) => {
     const set: SetInfo = {
       owner: row.owner,
       ownerUsername: row.owner_username,
