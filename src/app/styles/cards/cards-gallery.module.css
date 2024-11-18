@@ -1,11 +1,31 @@
-.setList {
+.setGallery {
+  box-shadow: 1px 1px 2px black;
+  border-radius: 10px;
+  margin: 2rem;
   padding: 2rem;
-  display: grid;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.setGallery h2 {
+  margin: 0;
+}
+
+.setGallery>a {
+  align-self: flex-end;
+}
+
+.setList {
+  overflow: scroll;
+  padding: 1rem 2rem;
+  margin-bottom: 1rem;
+  display: flex;
   gap: 3rem;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
 }
 
 .setThumb {
+  flex: 0 0 200px;
   background-color: #f8fafc;
   box-shadow: 1px 1px 2px #94a3b8;
   border-radius: 10px;
@@ -34,6 +54,7 @@
 .setThumb .description {
   color: #44403c;
   padding-left: .75rem;
+  grid-column: 1 / 3;
 }
 
 .setThumb .cardCount {
@@ -55,5 +76,6 @@
 }
 
 .setThumb .cardCount {
+  justify-self: end;
   grid-area: 3 / 2 / 4 / 3;
 }
