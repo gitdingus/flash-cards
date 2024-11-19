@@ -106,7 +106,7 @@ export async function getSetInfo(id: string) {
 type SetColumns = "datecreated" | "set.datecreated";
 type SortDirection = "ASC" | "DESC";
 
-interface SetInfoQueryConfig {
+export interface SetInfoQueryConfig {
   limit?: number,
   offset?: number,
   sort?: {
