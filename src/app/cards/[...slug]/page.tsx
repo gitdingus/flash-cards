@@ -11,6 +11,7 @@ interface Props {
 }
 export default async function Sets({ params: { slug }, searchParams}: Props) {
   let queryFn: (params?: SetInfoQueryConfig) => Promise<SetInfo[]>;
+  let title: string;
   const queryOptions: SetInfoQueryConfig = {};
   const QUERY_LIMIT = 10;
   queryOptions.limit = QUERY_LIMIT;
@@ -27,22 +28,25 @@ export default async function Sets({ params: { slug }, searchParams}: Props) {
   switch (path) {
     case "public": 
       queryFn = getAllPublicSets;
+      title = "Public Sets";
       break;
     case "private":
       queryFn = getAllowedPrivateSets;
+      title = "Private Sets";
       break;
     case "mine":
       queryFn = getOwnSets;
+      title = "My Sets";
       break;
     default:
-      return <p>Not Found</p>
+      return <p>Not found</p>
   }
 
-  console.log(queryOptions);
   const sets = await queryFn(queryOptions);
 
   return (
     <div>
+      <h2>{title}</h2>
       {
         sets.map(set => (
           <div key={set.id}>
