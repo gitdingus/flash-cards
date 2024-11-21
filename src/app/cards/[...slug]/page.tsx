@@ -1,5 +1,6 @@
 import { getAllPublicSets, getAllowedPrivateSets, getOwnSets, SetInfoQueryConfig } from '@/app/lib/data';
 import Link from 'next/link';
+import styles from '@/app/styles/cards/card-list.module.css';
 
 interface Props {
   params: {
@@ -46,27 +47,38 @@ export default async function Sets({ params: { slug }, searchParams}: Props) {
 
   return (
     <div>
-      <h2>{title}</h2>
+      <h1>{title}</h1>
       {
         sets.map(set => (
-          <div key={set.id}>
-            <h2><Link href={`/set/${set.id}`}>{set.title}</Link></h2>
-            <p>{set.description}</p>
-            <p><Link href={`/user/${set.ownerUsername}`}>{set.ownerUsername}</Link></p>
-            <p>{set.cardCount} card(s)</p>
-          </div>
+          <SetDisplay key={set.id} set={set} />
         ))
       }
-      {
-        sets.length >= QUERY_LIMIT
-        &&
-        <Link href={`/cards/${path}?page=${(Number.parseInt(searchParams.page) || 0) + 1}`}>Next</Link>
-      }
-      {
-        (searchParams?.page !== undefined && Number.parseInt(searchParams.page) > 0)
-        &&
-        <Link href={`/cards/${path}?page=${Number.parseInt(searchParams.page) - 1}`}>Prev</Link>
-      }
+      <div className={styles.navLinks}>
+        {
+          (searchParams?.page !== undefined && Number.parseInt(searchParams.page) > 0)
+          &&
+          <Link href={`/cards/${path}?page=${Number.parseInt(searchParams.page) - 1}`}>Prev</Link>
+        }
+        {
+          sets.length >= QUERY_LIMIT
+          &&
+          <Link href={`/cards/${path}?page=${(Number.parseInt(searchParams.page) || 0) + 1}`}>Next</Link>
+        }
+      </div>
+    </div>
+  )
+}
+
+interface SetDisplayProps {
+  set: SetInfo,
+}
+
+function SetDisplay({ set }: SetDisplayProps) {
+  return (
+    <div className={styles.setDisplay}>
+      <h2><Link href={`/set/${set.id}`}>{set.title}</Link></h2>
+      <p>{set.description}</p>
+      <p>Created by <Link href={`/user/${set.ownerUsername}`}>{set.ownerUsername}</Link> on {set.dateCreated.toLocaleDateString()} with {set.cardCount} cards</p>
     </div>
   )
 }
