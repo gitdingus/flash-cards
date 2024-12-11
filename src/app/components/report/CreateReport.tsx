@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useFormState } from 'react-dom';
 import { createReport } from '@/actions/report';
-import styles from '@/app/styles/report/create-report.module.css';
+import styles from '@/app/styles/reports/create-report.module.css';
 
 interface CreateReportProps {
   setId: string,
@@ -23,31 +23,13 @@ export default function CreateReport({ setId } : CreateReportProps) {
   }
 
   return (
-    <div className={styles.report}>
-      <button 
-        type="button"
-        onClick={() => setCollapsed(!collapsed)}
-      >
-        { collapsed ? 'Report' : 'Hide Report' }
-      </button>
-      <div className={`${styles.reportDialog} ${collapsed ? '' : styles.expanded}`}>
-        <form action={formAction}>
-          <input type="hidden" name="setId" value={setId} />
-          {
-            formState.form &&
-            <p>{formState.form}</p>
-          }
-          <label>
-            Reason:
-            <textarea name="report" rows={10} cols={75}></textarea>
-          </label>
-          {
-            formState.report &&
-            <p>{formState.report}</p>
-          }
-          <button type="submit">Submit</button>
-        </form>
-      </div>
+    <div className={styles.createReport}>
+      <form action={formAction}>
+        <input type="hidden" name="setId" value={setId} />
+        <textarea id={`${setId}-report`} name="report"></textarea>
+        <p className={styles.message}>{formState.form || formState.report || ""}</p>
+        <button type="submit">Submit</button>
+      </form>
     </div>
   )
 }
