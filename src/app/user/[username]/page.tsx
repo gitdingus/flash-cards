@@ -3,7 +3,9 @@ import { getUser } from "@/app/lib/accounts";
 import { getAllowedSetsFromUser } from "@/app/lib/data";
 import SetPermissions from '@/app/components/set-tools/SetPermissions';
 import CreateReport from '@/app/components/report/CreateReport';
+import SetFooter from './SetFooter';
 import styles from '@/app/styles/user/user-layout.module.css';
+
 interface UserParams {
   params: {
     username: string,
@@ -32,22 +34,12 @@ export default async function User({ params : { username }}: UserParams) {
               <p>
                 <span><a href={`/set/${set.id}`}>{set.title}</a>:</span> <span>{set.description}</span>
               </p>
-              {
-                ownProfile &&
-                <SetPermissions
-                  set={set}
-                />
-              }
-              {
-                session?.user &&
-                <CreateReport setId={set.id} />
-              }
+              <SetFooter set={set} ownSet={ownProfile} loggedIn={!!session?.user} />
             </div>
           ))
         }
       </div>
     </div>
   )
-
-
 }
+
