@@ -1,0 +1,10 @@
+.setFooter .buttons button {
+  background-color: transparent;
+  cursor: pointer;
+  margin: 0;
+  border: none;
+}
+
+.setFooter .buttons button:hover {
+  text-decoration: underline;
+}
