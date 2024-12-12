@@ -241,21 +241,27 @@ export async function getOwnSets(params?: SetInfoQueryConfig) {
 
 export async function getUsersPublicSets(userId: string) {
   const setQuery = await sql`
-    SELECT * 
+    SELECT set.*, users.username, COUNT(card.inset) as card_count 
     FROM set 
+    JOIN users ON (users.id = set.owner)
+    JOIN card ON (card.inset = set.id)
     WHERE owner = ${userId} 
       AND public = true
       AND hidden = false
       AND removed = false 
+    GROUP BY set.id, users.username
     ;`;
-  const sets: SetInfoBase[] = setQuery.rows.map((setRecord) => {
-    const set: SetInfoBase = {
+  const sets: SetInfo[] = setQuery.rows.map((setRecord) => {
+    const set: SetInfo = {
       id: setRecord.id,
       title: setRecord.name,
       description: setRecord.description,
       dateCreated: setRecord.datecreated,
       isPublic: setRecord.public,
       lastModified: setRecord.lastmodified,
+      owner: setRecord.owner,
+      ownerUsername: setRecord.username,
+      cardCount: setRecord.card_count,
     }
 
     return set;
@@ -279,42 +285,56 @@ export async function getAllowedSetsFromUser(userId: string) {
   let allowedSetsQuery; 
   if (await isAdmin()) {
     allowedSetsQuery = await sql`
-      SELECT * FROM set WHERE owner = ${userId};
-    `;
+      SELECT set.*, users.username, COUNT(card.inset) as card_count
+      FROM set
+      JOIN users ON (users.id = set.owner) 
+      JOIN card ON (card.inset = set.id)
+      WHERE owner = ${userId}
+      GROUP BY set.id, users.username
+    ;`;
   } else {
     allowedSetsQuery = await sql`
-      SELECT id, name, description, datecreated, owner, public 
+      SELECT set.*, users.username, COUNT(card.inset) as card_count
       FROM set 
+      JOIN users ON (users.id = set.owner)
+      JOIN card ON (card.inset = set.id)
       WHERE owner = ${userId}
         AND public = true
         AND hidden = false
         AND removed = false
-  
+      GROUP BY set.id, users.username
+
       UNION
-  
-      SELECT set.id, name, description, datecreated, owner, public
+      
+      SELECT set.*, users.username, COUNT(card.inset) as card_count
       FROM set
       JOIN setpermission
-        ON setpermission.setid = set.id
+        ON (setpermission.setid = set.id)
+      JOIN users ON (users.id = set.owner)
+      JOIN card ON (card.inset = set.id)
       WHERE 
         owner = ${userId}
         AND hidden = false
         AND removed = false
         AND setpermission.userid = ${session.user.userId}
         AND setpermission.granted = true
-      ;
-    `;
+      GROUP BY set.id, users.username
+    ;`;
   }
 
+  
 
-  const sets: SetInfoBase[] = allowedSetsQuery.rows.map((setRecord) => {
-    const set: SetInfoBase = {
+  const sets: SetInfo[] = allowedSetsQuery.rows.map((setRecord) => {
+    const set: SetInfo = {
       id: setRecord.id,
       title: setRecord.name,
       description: setRecord.description,
       dateCreated: setRecord.datecreated,
       isPublic: setRecord.public,
       lastModified: setRecord.lastmodified,
+      owner: setRecord.owner,
+      ownerUsername: setRecord.username,
+      cardCount: setRecord.card_count,
     };
 
     return set;
