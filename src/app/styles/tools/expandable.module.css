@@ -1,0 +1,7 @@
+.expandable {
+  display: none;
+}
+
+.expandable.expanded {
+  display: block;
+}
