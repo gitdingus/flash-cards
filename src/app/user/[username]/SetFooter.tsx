@@ -3,7 +3,7 @@ import { useState } from 'react';
 import SetPermissions from '@/app/components/set-tools/SetPermissions';
 import CreateReport from '@/app/components/report/CreateReport';
 import styles from '@/app/styles/user/set-footer.module.css';
-import Expandable from '@/app/components/tools/Expandable';
+
 type FooterOptions = "none" | "report" | "privacy";
 
 export default function SetFooter({ set, ownSet, loggedIn }: { set: SetInfoBase, ownSet: boolean, loggedIn: boolean }) {
