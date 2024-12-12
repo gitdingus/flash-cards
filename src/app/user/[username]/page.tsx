@@ -1,8 +1,6 @@
 import { auth } from '@/auth';
 import { getUser } from "@/app/lib/accounts";
 import { getAllowedSetsFromUser } from "@/app/lib/data";
-import SetPermissions from '@/app/components/set-tools/SetPermissions';
-import CreateReport from '@/app/components/report/CreateReport';
 import SetFooter from './SetFooter';
 import styles from '@/app/styles/user/user-layout.module.css';
 
@@ -23,6 +21,7 @@ export default async function User({ params : { username }}: UserParams) {
   }
 
   const sets = await getAllowedSetsFromUser(user.id);
+
   const ownProfile = session?.user.userId === user.id;
   return (
     <div>
@@ -31,10 +30,9 @@ export default async function User({ params : { username }}: UserParams) {
         {
           sets.map((set) => (
             <div key={set.id} className={styles.set}>
-              <p>
-                <span><a href={`/set/${set.id}`}>{set.title}</a>:</span> <span>{set.description}</span>
-              </p>
-              <SetFooter set={set} ownSet={ownProfile} loggedIn={!!session?.user} />
+            <h2><a href={`/set/${set.id}`}>{set.title}</a></h2>
+            <p><span>{set.description}</span><span className={styles.cardCount}>{set.cardCount} {set.cardCount > 1 ? "cards": "card"}</span></p>
+            <SetFooter set={set} ownSet={ownProfile} loggedIn={!!session?.user} />
             </div>
           ))
         }
