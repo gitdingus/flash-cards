@@ -37,3 +37,7 @@ header nav ul {
   gap: 1rem;
   justify-content: center;
 }
+
+main {
+  padding: 2rem;
+}

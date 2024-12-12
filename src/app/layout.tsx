@@ -43,7 +43,7 @@ export default async function RootLayout({
           </div>
         </header>
         <AppSessionContext session={session}>
-          {children}
+          <main>{children}</main>
         </AppSessionContext>
       </body>
     </html>
