@@ -2,6 +2,7 @@ import { sql } from '@vercel/postgres';
 import { getSet } from '@/app/lib/data';
 import { auth } from '@/auth';
 import { hasAccessToSet } from '@/app/lib/permissions';
+import Expandable from '@/app/components/tools/Expandable';
 import CardGallery from '@/app/components/set-display/CardGallery';
 import CreateReport from '@/app/components/report/CreateReport';
 export default async function SetInfo({ params }: { params: { id: string } }) {
@@ -36,7 +37,9 @@ export default async function SetInfo({ params }: { params: { id: string } }) {
       }
       {
         session?.user &&
-        <CreateReport setId={set.id} />
+        <Expandable buttonText="Report">
+          <CreateReport setId={set.id} />
+        </Expandable>
       }
       {
         session?.user.userId === set.owner && 
